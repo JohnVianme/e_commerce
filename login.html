@@ -2,6 +2,55 @@
 <html>
 	<head>
 		<title>Login</title>
+		<script>
+			function sendReq(url){
+				var username = document.getElementById('username').value
+				var password = document.getElementById('password').value
+				var acctType = document.querySelectorAll('.type')
+				console.log(`username: ${username}, password: ${password}`)
+				let selectedValue = null
+				
+				for (var radios of acctType){
+					if(radios.checked){
+						selectedValue = radios.id
+						break
+					}
+				}
+				if (selectedValue){
+					console.log('from login.html')
+					console.log(selectedValue)
+					if (selectedValue == 'customer_type'){
+						acctType = 'customer'
+					}else{
+						acctType = 'seller'
+					}
+				} else {
+					console.log('No button seleced')
+				}
+				console.log(`acct_type: ${acctType}`)
+				var body = {}
+				if (username != null){
+					body = {'username': username, 'password': password, 
+							'acct_type': acctType}
+				}
+				fetch(url, {
+					'method':'post',
+					'headers':{'Content-Type':'application/json'},
+					'body': JSON.stringify(body)
+				})
+				.then((res)=>{
+					return res.text()
+				})
+				.then((text)=>{
+					document.open()
+					document.write(text)
+					document.close()
+				})
+				.catch((err)=>{
+					console.log(err)
+				})
+			}
+		</script>
 	</head>
 	<body>
 		<header>
@@ -22,13 +71,13 @@
 			</label><br>
 			Account type:
 				<label for="customer_type">
-				Customer <input type="radio" name="acct_type" id="customer_type">
+				Customer <input type="radio" name="acct_type" id="customer_type" class="type">
 				</label>
 				<label for="seller_type">
-				Seller <input type="radio" name="acct_type" id="seller_type">
+				Seller <input type="radio" name="acct_type" id="seller_type" class="type">
 				</label><br>
-			<input type="button" value="Login">
-			<input type="button" value="Create New Accout">
+			<input type="button" value="Login" onclick="sendReq('lgn_action')">
+			<input type="button" value="Create New Accout" onclick="sendReq('create_acct')">
 		</form>
 	</body>
 </html>
