@@ -6,28 +6,28 @@
 			function sendReq(url){
 				var username = document.getElementById('username').value
 				var password = document.getElementById('password').value
-				var acctType = document.querySelectorAll('.type')
+				var acctTypeRadios = document.querySelectorAll('.type')
 				console.log(`username: ${username}, password: ${password}`)
-				let selectedValue = null
+				var acctType = null
 				
-				for (var radios of acctType){
-					if(radios.checked){
-						selectedValue = radios.id
+				for (var i = 0; i < acctTypeRadios.length; i++){
+					var radio = acctTypeRadios[i]
+					if (radio.checked){
+						if(radio.id == 'customer_type'){
+							acctType = 'customer'
+						} else if (radio.id == 'seller_type'){
+							acctType = 'seller'
+						}
 						break
 					}
 				}
-				if (selectedValue){
-					console.log('from login.html')
-					console.log(selectedValue)
-					if (selectedValue == 'customer_type'){
-						acctType = 'customer'
-					}else{
-						acctType = 'seller'
-					}
-				} else {
-					console.log('No button seleced')
+				
+				if (!acctType){
+					alert('Please select your account type.')
+					return
 				}
 				console.log(`acct_type: ${acctType}`)
+				
 				var body = {}
 				if (username != null){
 					body = {'username': username, 'password': password, 

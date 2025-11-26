@@ -23,8 +23,9 @@ function validateUserInfo(username,password){
 		
 		var upper = (ascii >= 65 && ascii <= 90)
 		var lower = (ascii >= 97 && ascii <= 122)
+		var digit = (ascii >= 48 && ascii <= 57)
 		
-		if (!upper && !lower){
+		if (!upper && !lower && !digit){
 			return false
 		}
 	}
@@ -48,7 +49,7 @@ function checkUsers(username, acctType){
 function checkLogin(username, password){
 	for(var i = 0; i < userList.length; i++){
 		var curr = userList[i]
-		if((curr.username == username) && (curr.password = password)){
+		if((curr.username == username) && (curr.password == password)){
 			return true
 		}
 	}
@@ -85,6 +86,15 @@ function generateToken(){
 	return crypto.randomBytes(16).toString('hex')
 }
 
+function getAcctType(username){
+	for (var i = 0; i < userList.length; i++){
+		var curr = userList[i]
+		if(curr.username == username){
+			return curr.acctType
+		}
+	}
+	return null
+}
 
 app.get('/',(req,res)=>{
 	res.sendFile(path.join(dir,'home.html'))
@@ -104,12 +114,11 @@ app.post('/lgn_action', express.json(), (req,res)=>{
 	var username = query.username
 	var password = query.password
 	var hashedPW = hash.update(password).digest('hex')
-	var acctType = query.acct_type
-	console.log(query)
-	console.log(`Server says: username: ${username}, password: ${password}, acctType: ${acctType}`)
+	
 	if (checkLogin(username,hashedPW)){
 		var token = generateToken()
 		sessionList.push({'username':username,'token':token})
+		var acctType = getAcctType(username)
 		if (acctType == 'customer'){
 			res.send(`
 				<script>
@@ -117,14 +126,28 @@ app.post('/lgn_action', express.json(), (req,res)=>{
 					window.location.href = '/home'
 				</script>
 			`)
-		}else{
+		}else if (acctType == 'seller'){
 			res.send(`
 				<script>
 					alert('Welcome ${username}, please use our tools to manage your e-comm store!')
 					window.location.href = '/home'
 				</script>
 			`)
+		} else {
+			res.send(`
+				<script>
+					alert('An error occured loading your account information, please attempt to log back in. If the problem persists contact us via our contact page.')
+					window.location.href = '/login'
+				</script>
+			`)
 		}
+	} else {
+		res.send(`
+				<script>
+					alert('Invalid login information username or password incorrect!.')
+					window.location.href = '/login'
+				</script>
+			`)
 	}
 })	
 
@@ -170,9 +193,10 @@ app.post('/create_acct', express.json(), (req,res)=>{
 					window.location.href = '/login'
 				</script>
 			`)
-		}
+		} 
 	}
 })
+
 app.listen(port,()=>{
 	console.log('Server is running...')
 	console.log('Loading users...')
