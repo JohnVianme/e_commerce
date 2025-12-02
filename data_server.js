@@ -157,9 +157,9 @@ async function loadServer() {
 }
 
 await loadServer();
-await addToShelf("David", {
-  name: "tv",
-  price: 100,
-  seller: "David",
-  details: "2020 28-inch TV",
-});
+// await addToShelf("David", {
+//   name: "tv",
+//   price: 100,
+//   seller: "David",
+//   details: "2020 28-inch TV",
+// });
