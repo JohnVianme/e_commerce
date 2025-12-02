@@ -96,6 +96,35 @@ function getAcctType(username){
 	return null
 }
 
+function createSellerPage(username){
+	var page =`
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<title>${username}'s Store</title>
+			</head>
+			<body>
+				<header>
+					<h1>Welcome to ${username}'s Store</h1>
+				</header>
+				<nav>
+					<a href='/home'>Home</a>
+					<a href='/login'>Login</a>
+				</nav>
+				<p>THis is the default page for seller <strong>${username}</strong>.</p>
+				<p>Products and other info will go here later (from MongoDB).</p>
+			</body>
+		</html>
+		`;
+		var filename = path.join(dir, `seller_${username}.html`)
+		try{
+			fs.writeFileSync(filename,page,{encoding:'utf8'})
+			console.log('Creaet seller page for: ', username)
+		}catch(err){
+			console.log('Error creating seller page: ',err)
+		}
+}
+
 app.get('/',(req,res)=>{
 	res.sendFile(path.join(dir,'home.html'))
 })
@@ -122,6 +151,8 @@ app.post('/lgn_action', express.json(), (req,res)=>{
 		if (acctType == 'customer'){
 			res.send(`
 				<script>
+					window.localStorage.setItem('username','${username}')
+					window.localStorage.setItem('acctType','${acctType}')
 					alert('Welcome ${username}, feel free to browse from our list of wonderful sellers!')
 					window.location.href = '/home'
 				</script>
@@ -129,6 +160,8 @@ app.post('/lgn_action', express.json(), (req,res)=>{
 		}else if (acctType == 'seller'){
 			res.send(`
 				<script>
+					window.localStorage.setItem('username','${username}')
+					window.localStorage.setItem('acctType','${acctType}')
 					alert('Welcome ${username}, please use our tools to manage your e-comm store!')
 					window.location.href = '/home'
 				</script>
@@ -172,6 +205,9 @@ app.post('/create_acct', express.json(), (req,res)=>{
 	if(validInfo && newUser){
 		userList.push({'username':username,'password':hashedPW,'acctType':acctType})
 		writeUser(username,hashedPW,acctType)
+		if(acctType == 'seller'){
+			createSellerPage(username)
+		}
 		res.send(`
 			<script>
 				alert('Welcome ${username}, your ${acctType} account has been created! Please login to begin your e-comm adventure!')
@@ -194,6 +230,28 @@ app.post('/create_acct', express.json(), (req,res)=>{
 				</script>
 			`)
 		} 
+	}
+})
+
+app.get('/sellers',(req,res)=>{
+	var sellers = []
+	for (var i = 0; i <userList.length; i++){
+		var curr = userList[i]
+		if(curr.acctType == 'seller'){
+			sellers.push({username:curr.username})
+		}
+	}
+	res.json(sellers)
+})
+
+app.get('/seller/:username',(req,res)=>{
+	var username = req.params.username
+	var filename = path.join(dir, `seller_${username}.html`)
+	
+	if(fs.existsSync(filename)){
+		res.sendFile(filename)
+	}else{
+		res.status(404).send('Seller page not found.')
 	}
 })
 
