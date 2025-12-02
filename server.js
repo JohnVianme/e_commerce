@@ -36,6 +36,7 @@ async function MongoConnectAwait() {
   }
 }
 
+// show consumers collections
 async function showConsumers() {
   try {
     const producers = shopDB.collection("consumer");
@@ -46,6 +47,7 @@ async function showConsumers() {
   }
 }
 
+// show products collections
 async function showProduct() {
   try {
     const producers = shopDB.collection("product");
@@ -68,7 +70,10 @@ async function loadServer() {
 
     // connect to the DB
     await MongoConnectAwait();
+    console.log("Products:");
     await showProduct();
+    console.log("Consumers:");
+    await showConsumers();
   } catch (error) {
     // log issues with connecting
     console.log("Unable to Connect to Server!");
