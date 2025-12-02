@@ -97,6 +97,48 @@ async function addToCart(name, item) {
 }
 
 /*
+Function to gets items from a users cart
+@name = a username for a user
+@return: list of items
+*/
+async function getCart(name) {
+  try {
+    let coll = shopDB.collection("consumer");
+    let consumer = await coll.findOne({ name: name });
+    let cart = consumer.cart;
+    if (consumer) {
+      return cart;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.log("Error: addToCart() ");
+    console.log(error);
+  }
+}
+
+/*
+Function to gets items from a users shelf
+@name = a username for a user
+@return: list of items
+*/
+async function getShelf(name) {
+  try {
+    let coll = shopDB.collection("product");
+    let producer = await coll.findOne({ name: name });
+    let shelf = producer.shelf;
+    if (producer) {
+      return shelf;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.log("Error: addToCart() ");
+    console.log(error);
+  }
+}
+
+/*
 Helper to add a producer obejct:
 Type Product:
 name: string
@@ -157,9 +199,6 @@ async function loadServer() {
 }
 
 await loadServer();
-// await addToShelf("David", {
-//   name: "tv",
-//   price: 100,
-//   seller: "David",
-//   details: "2020 28-inch TV",
-// });
+let shelf = await getShelf("David");
+console.log("----------------------------");
+console.log(shelf);
