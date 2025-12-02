@@ -1,9 +1,9 @@
 /*
 Test Server to Connect to MangoDB
 */
-const express = require("express");
+import express from "express";
 const app = express();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+import { MongoClient, ServerApiVersion } from "mongodb";
 const URL = "mongodb://localhost:27017";
 const client = new MongoClient(URL);
 let shopDB; // data base
@@ -48,7 +48,7 @@ async function showConsumers() {
 }
 
 // show products collections
-async function showProduct() {
+async function showProducts() {
   try {
     const producers = shopDB.collection("product");
     const data = await producers.find({}).toArray();
@@ -58,8 +58,83 @@ async function showProduct() {
   }
 }
 
-/* 
+/*
+Helper to add a consumer obejct:
+Type Consumer:
+name: string
+cart: list of objects to buy
+purchased: list of objects baught- (could be uneeded)
+*/
+async function addConsumer(name) {
+  try {
+    const coll = shopDB.collection("consumer");
+    const user = { name: name, cart: [], purchased: [] };
+    const res = await coll.insertOne(user);
+    console.log(`Added ${name}!`);
+  } catch (error) {
+    console.log("Error: addConsumer() ");
+    console.log(error);
+  }
+}
 
+/*
+Function to add an item to a users cart
+@name = a username for a user
+@item = a product object: {name : name, price: price, seller: seller, details: details}
+*/
+async function addToCart(name, item) {
+  try {
+    const coll = shopDB.collection("consumer");
+    const res = await coll.updateOne(
+      { name: name },
+      { $addToSet: { cart: item } }
+    );
+    console.log(`Added to ${name}'s Cart!`);
+  } catch (error) {
+    console.log("Error: addToCart() ");
+    console.log(error);
+  }
+}
+
+/*
+Helper to add a producer obejct:
+Type Product:
+name: string
+shelf: list of things to sell
+*/
+async function addProducer(name) {
+  try {
+    const coll = shopDB.collection("product");
+    const user = { name: name, shelf: [] };
+    const res = await coll.insertOne(user);
+    console.log(`Added ${name}!`);
+  } catch (error) {
+    console.log("Error: addProducer() ");
+    console.log(error);
+  }
+}
+
+/*
+Function to add an item to a users shelf
+@name = a username for a user
+@item = a product object: {name : name, price: price, seller: seller, details: details}
+*/
+async function addToShelf(name, item) {
+  try {
+    const coll = shopDB.collection("product");
+    const res = await coll.updateOne(
+      { name: name },
+      { $addToSet: { shelf: item } }
+    );
+    console.log(`Added to ${name}'s Shelf!`);
+  } catch (error) {
+    console.log("Error: addToShelf() ");
+    console.log(error);
+  }
+}
+
+/* 
+Function to start the Server and Database Connetion
 */
 async function loadServer() {
   try {
@@ -71,7 +146,7 @@ async function loadServer() {
     // connect to the DB
     await MongoConnectAwait();
     console.log("Products:");
-    await showProduct();
+    await showProducts();
     console.log("Consumers:");
     await showConsumers();
   } catch (error) {
@@ -81,4 +156,10 @@ async function loadServer() {
   }
 }
 
-loadServer();
+await loadServer();
+await addToShelf("David", {
+  name: "tv",
+  price: 100,
+  seller: "David",
+  details: "2020 28-inch TV",
+});
