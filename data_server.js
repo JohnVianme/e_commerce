@@ -3,12 +3,12 @@ Test Server to Connect to MangoDB
 */
 import express from "express";
 const app = express();
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient } from "mongodb";
 const URL = "mongodb://localhost:27017";
 const client = new MongoClient(URL);
 let shopDB; // data base
 /*
-async promise connection
+promise connection
 */
 // function MongoConnectPromise() {
 //   client
@@ -39,8 +39,8 @@ async function MongoConnectAwait() {
 // show consumers collections
 async function showConsumers() {
   try {
-    const producers = shopDB.collection("consumer");
-    const data = await producers.find({}).toArray();
+    const consumers = shopDB.collection("consumer");
+    const data = await consumers.find({}).toArray();
     console.log(data);
   } catch (error) {
     console.log(error);
@@ -192,7 +192,7 @@ async function loadServer() {
     console.log("Consumers:");
     await showConsumers();
   } catch (error) {
-    // log issues with connecting
+    // log issues with connecting`
     console.log("Unable to Connect to Server!");
     console.log(error);
   }
