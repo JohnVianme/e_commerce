@@ -133,6 +133,18 @@ app.get('/home',(req,res)=>{
 	res.sendFile(path.join(dir,'home.html'))
 })
 
+app.get('/about',(req,res)=>{
+	res.sendFile(path.join(dir,'about.html'))
+})
+
+app.get('/contact',(req,res)=>{
+	res.sendFile(path.join(dir,'contact.html'))
+})
+
+app.get('/add_item',(req,res)=>{
+	res.sendFile(path.join(dir,'add_item.html'))
+})
+
 app.get('/login',(req,res)=>{
 	res.sendFile(path.join(dir,'login.html'))
 })

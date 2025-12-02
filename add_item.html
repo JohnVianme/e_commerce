@@ -2,12 +2,66 @@
 <html>
     <head>
         <title>Add Item</title>
+        <script>
+            function checkAuth(){
+                var username = window.localStorage.getItem('username')
+                var acctType = window.localStorage.getItem('acctType')
+                
+                if (!username || acctType != 'seller'){
+                    alert('You must be logged in as a seller to access this page.')
+                    window.location.href = '/login'
+                }
+            }
+            
+            function submitItem(){
+                var productName = document.getElementById('productName').value
+                var price = document.getElementById('price').value
+                var description = document.getElementById('description').value
+                var username = window.localStorage.getItem('username')
+                
+                if (!productName || !price){
+                    alert('Please fill in all required fields.')
+                    return
+                }
+                
+                var item = {
+                    seller: username,
+                    name: productName,
+                    price: parseFloat(price),
+                    description: description
+                }
+                
+                fetch('/add_item', {
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(item)
+                })
+                .then((res) => {
+                    return res.text()
+                })
+                .then((text) => {
+                    document.open()
+                    document.write(text)
+                    document.close()
+                })
+                .catch((err) => {
+                    console.log(err)
+                    alert('Error adding item. Please try again.')
+                })
+            }
+        </script>
     </head>
-    <body>
+    <body onload="checkAuth()">
         <header>
             <h1>Add Item</h1>
         </header>
-        <form action="#" method="post">
+        <nav>
+            <a href="/home">Home</a>
+            <a href="/about">About</a>
+            <a href="/contact">Contact</a>
+            <a href="/login">Login</a>
+        </nav>
+        <form>
             <div>
                 <label for="productName">Product Name:</label>
                 <input type="text" id="productName" name="productName" required>
@@ -23,7 +77,8 @@
                 <textarea id="description" name="description"></textarea>
             </div>
         
-            <button type="submit">Submit</button>
+            <input type="button" value="Submit" onclick="submitItem()">
+            <input type="button" value="Cancel" onclick="window.location.href='/home'">
         </form>
         <footer>
             &copy; 2025 E Commerce Inc.
