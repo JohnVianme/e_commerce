@@ -300,13 +300,50 @@ async function createSellerProfile(username){
 	}
 }
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(dir, "home.html"));
-});
+function checkSession(username){
+	for (var i = 0; i < sessionList.length; i++){
+		var curr = sessionList[i]
+		if(curr.username == username){
+			return true
+		}
+	}
+	return false
+}
 
-app.get("/home", (req, res) => {
-  res.sendFile(path.join(dir, "home.html"));
-});
+function checkSeller(username){
+    for(var i=0;i<userList.length;i++){
+        var curr = userList[i]
+        if((curr.username==username)&&(curr.acctType=='seller')){
+            return true
+        }
+    }
+    return false
+}
+
+function handleHome(req, res){
+	var username = null
+    
+	if (req.method == 'GET'){
+		username = req.query.Username
+	} else if (req.method == 'POST'){
+		if (req.body){
+			username = req.body.username
+		}
+	}
+	
+    if(username && checkSeller(username)&&checkSession(username)){
+        res.sendFile(path.join(dir, 'home_seller.html'))
+    }
+    else{
+        res.sendFile(path.join(dir, 'home.html'))
+    }
+}
+
+app.get('/home', handleHome)
+
+app.get('/', handleHome)
+
+app.post('/home', express.json(), handleHome)
 
 app.get("/about", (req, res) => {
   res.sendFile(path.join(dir, "about.html"));
@@ -318,6 +355,10 @@ app.get("/contact", (req, res) => {
 
 app.get("/add_item", (req, res) => {
   res.sendFile(path.join(dir, "add_item.html"));
+});
+
+app.post("/login", (req, res) => {
+  res.sendFile(path.join(dir, "login.html"));
 });
 
 app.get("/login", (req, res) => {
@@ -350,7 +391,7 @@ app.post("/lgn_action", express.json(), (req, res) => {
 					window.localStorage.setItem('username','${username}')
 					window.localStorage.setItem('acctType','${acctType}')
 					alert('Welcome ${username}, please use our tools to manage your e-comm store!')
-					window.location.href = '/home'
+					window.location.href = '/home?username=' + encodeURIComponent('${username}')
 				</script>
 			`);
     } else {
@@ -452,6 +493,11 @@ app.get("/api/seller/:username",async (req,res) =>{
 		res.status(500).json({error:"Server endpoint error"})
 	}
 })
+
+app.post('/manage',express.json(),(req,res) => {
+	res.sendFile(path.join(dir,'manage.html'))
+})
+
 /* 
 Function to start the Server and Database Connetion
 */
@@ -477,5 +523,7 @@ async function loadServer() {
     console.log(error);
   }
 }
+
+app
 
 loadServer();
