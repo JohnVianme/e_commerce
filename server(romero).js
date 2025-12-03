@@ -5,9 +5,6 @@ const crypto = require("crypto");
 
 const {MongoClient} = require("mongodb");
 
-const { MongoClient } = require('mongodb');
-
-
 const app = express();
 const port = 8080;
 const URL = "mongodb://localhost:27017";
