@@ -1,69 +1,69 @@
 <!DOCTYPE html>
 <html>
-	<head>	
-		<title>Seller Store</title>
-		<script>
-			function initSellerPage(){
-				var pathParts = window.location.pathname.split("/")
-				var username = decodeURIComponent(pathParts[pathParts.length - 1])
-				
-				var header = document.getElementById('storeHeader')
-				header.innerText = username + "'s Store"
-				var itemList = document.getElementById('itemList')
-				itemList.innerHTML = '<li>Fetching Items...</li>'
-				
-				fetch('/api/seller/' + encodeURIComponent(username),{method:'get'})
-				.then((res)=> {
-					return res.json()
-				})
-				.then((data)=>{
-					if(!data || !Array.isArray(data.shelf)){
-						itemList.innerHTML = '<li>No Items listed yet.</li>'
-						return
-					}
-					var shelf = data.shelf
-					
-					itemList.innerHTML = ''
-					
-					if(shelf.length == 0){
-						itemList.innerHTML = '<li>No items listed yet.</li>'
-						return
-					}
-					
-					for(var i = 0; i<shelf.length; i++){
-						var item = shelf[i]
-						var li = document.createElement('li')
-						var text = item.name || 'Unnamed item listing'
-						if(item.price != undefined){
-							text += ' - $' + item.price
-						}
-						if (item.details){
-							text += ' (' + item.details + ')'
-						}
-						
-						li.innerText = text
-						itemList.appendChild(li)
-					}
-				})
-				.catch((err)=>{
-					console.log(err)
-					itemList.innerHTML = '<li>Error loading items.</li>'
-				})
-			}	
-		</script>
-	</head>
-	<body onload="initSellerPage()">
-		<header>
-			<h1 id="storeHeader">Seller Store</h1>
-		</header>
-		<nav>
-			<a href="/home">Home</a>
-			<a href="/login">Login</a>
-		</nav>
-		
-		<h2>Items for sale</h2>
-		<ul id="itemList">
-			<li>Loading...</li>
-		</ul>
-	</body>
+  <head>
+    <title>Seller Store</title>
+    <script>
+      function initSellerPage() {
+        var pathParts = window.location.pathname.split("/");
+        var username = decodeURIComponent(pathParts[pathParts.length - 1]);
+
+        var header = document.getElementById("storeHeader");
+        header.innerText = username + "'s Store";
+        var itemList = document.getElementById("itemList");
+        itemList.innerHTML = "<li>Fetching Items...</li>";
+
+        fetch("/api/seller/" + encodeURIComponent(username), { method: "get" })
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            if (!data || !Array.isArray(data.shelf)) {
+              itemList.innerHTML = "<li>No Items listed yet.</li>";
+              return;
+            }
+            var shelf = data.shelf;
+
+            itemList.innerHTML = "";
+
+            if (shelf.length == 0) {
+              itemList.innerHTML = "<li>No items listed yet.</li>";
+              return;
+            }
+
+            for (var i = 0; i < shelf.length; i++) {
+              var item = shelf[i];
+              var li = document.createElement("li");
+              var text = item.name || "Unnamed item listing";
+              if (item.price != undefined) {
+                text += " - $" + item.price;
+              }
+              if (item.details) {
+                text += " (" + item.details + ")";
+              }
+
+              li.innerText = text;
+              itemList.appendChild(li);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+            itemList.innerHTML = "<li>Error loading items.</li>";
+          });
+      }
+    </script>
+  </head>
+  <body onload="initSellerPage()">
+    <header>
+      <h1 id="storeHeader">Seller Store</h1>
+    </header>
+    <nav>
+      <a href="/home">Home</a>
+      <a href="/login">Login</a>
+    </nav>
+
+    <h2>Items for sale</h2>
+    <ul id="itemList">
+      <li>Loading...</li>
+    </ul>
+  </body>
 </html>
