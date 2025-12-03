@@ -357,11 +357,17 @@ app.get("/add_item", (req, res) => {
 });
 
 /* POST for adding a item to a sellers store */
-app.post("/add_item", express.json(), (req, res) => {
+app.post("/add_item", express.json(), async (req, res) => {
   console.log("About to add an item!");
   let qr = req.body;
   console.log(qr);
-  res.send("Item added");
+  // add to the sellers data base
+  let result = await addToShelf(qr.seller, qr);
+  if (result) {
+    res.send("Item added");
+  } else {
+    res.send("Unable to send item, please try again another time");
+  }
 });
 
 app.post("/login", (req, res) => {
