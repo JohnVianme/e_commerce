@@ -2,11 +2,11 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
-<<<<<<< HEAD
+
 const {MongoClient} = require("mongodb");
-=======
+
 const { MongoClient } = require('mongodb');
->>>>>>> a03e26b94b8d9647cd7030abaa3fcdc1eb2b3267
+
 
 const app = express();
 const port = 8080;
