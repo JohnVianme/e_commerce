@@ -190,7 +190,7 @@ async function addConsumer(name) {
 /*
 Function to add an item to a users cart
 @name = a username for a user
-@item = a product object: {name : name, price: price, seller: seller, details: details}
+@item = a product object: {name : name, price: price, seller: seller, description: description}
 */
 async function addToCart(name, item) {
   try {
@@ -270,7 +270,7 @@ async function addProducer(name) {
 /*
 Function to add an item to a users shelf
 @name = a username for a user
-@item = a product object: {name : name, price: price, seller: seller, details: details}
+@item = a product object: {name : name, price: price, seller: seller, description: description}
 */
 async function addToShelf(name, item) {
   try {
@@ -358,6 +358,7 @@ app.get("/add_item", (req, res) => {
 
 /* POST for adding a item to a sellers store */
 app.post("/add_item", express.json(), (req, res) => {
+  console.log("About to add an item!");
   let qr = req.body;
   console.log(qr);
   res.send("Item added");
@@ -511,11 +512,10 @@ async function loadServer() {
   try {
     // connect to the DB
     await MongoConnectAwait();
-    console.log("Products:");
-    await showProducts();
-    console.log("Consumers:");
-    await showConsumers();
-
+    // console.log("Products:");
+    // await showProducts();
+    // console.log("Consumers:");
+    // await showConsumers();
     // start the server
     app.listen(port, async () => {
       console.log("Server is running...");
