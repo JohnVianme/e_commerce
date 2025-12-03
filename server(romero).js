@@ -181,6 +181,7 @@ async function addConsumer(name) {
     const user = { name: name, cart: [], purchased: [] };
     const res = await coll.insertOne(user);
     console.log(`Added ${name}!`);
+    return true;
   } catch (error) {
     console.log("Error: addConsumer() ");
     console.log(error);
@@ -425,7 +426,7 @@ app.post("/lgn_action", express.json(), (req, res) => {
   }
 });
 
-app.post("/create_acct", express.json(), (req, res) => {
+app.post("/create_acct", express.json(), async (req, res) => {
   var query = req.body;
 
   var username = query.username;
@@ -452,15 +453,27 @@ app.post("/create_acct", express.json(), (req, res) => {
       acctType: acctType,
     });
     writeUser(username, hashedPW, acctType);
+    let createdUser = null;
     if (acctType == "seller") {
-      createSellerProfile(username);
+      // add a new seller
+      const createdUser = await createSellerProfile(username);
+    } else {
+      // add a new buyer
+      const createdUser = await addConsumer(username);
     }
-    res.send(`
+    if (createdUser) {
+      res.send(`
 			<script>
 				alert('Welcome ${username}, your ${acctType} account has been created! Please login to begin your e-comm adventure!')
 				window.location.href = '/login'
 			</script>
 		`);
+    } else {
+      res.send(`<script>
+				alert('Unable to create account at this time, please try again later.')
+				window.location.href = '/login'
+			</script>`);
+    }
   } else {
     if (!validInfo) {
       res.send(`
