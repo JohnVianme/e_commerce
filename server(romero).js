@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
-const { MongoClient } = require("mongodb");
+const {MongoClient} = require("mongodb");
 
 const app = express();
 const port = 8080;
@@ -99,7 +99,8 @@ function getAcctType(username) {
   }
   return null;
 }
-
+/*
+-------------Depercated function--------------
 function createSellerPage(username) {
   var page = `
 		<!DOCTYPE html>
@@ -128,7 +129,8 @@ function createSellerPage(username) {
     console.log("Error creating seller page: ", err);
   }
 }
-
+-----------Depercated function---------------
+*/
 /*
 async await connection
 */
@@ -237,11 +239,12 @@ async function getShelf(name) {
     if (producer) {
       return shelf;
     } else {
-      return null;
+      return [];
     }
   } catch (error) {
-    console.log("Error: addToCart() ");
+    console.log("Error: getShelf() ");
     console.log(error);
+	return []
   }
 }
 
@@ -280,6 +283,20 @@ async function addToShelf(name, item) {
     console.log("Error: addToShelf() ");
     console.log(error);
   }
+}
+
+async function createSellerProfile(username){
+	try{
+		const coll = shopDB.collection("product")
+		const sellerProfile = {
+			name: username,
+			shelf:[]
+		}
+		await coll.insertOne(sellerProfile)
+		console.log(`Seller profile created for ${username}`)
+	} catch(err){
+		console.log('Error creating seller profile:',err)
+	}
 }
 
 app.get("/", (req, res) => {
@@ -381,7 +398,7 @@ app.post("/create_acct", express.json(), (req, res) => {
     });
     writeUser(username, hashedPW, acctType);
     if (acctType == "seller") {
-      createSellerPage(username);
+      createSellerProfile(username);
     }
     res.send(`
 			<script>
@@ -419,17 +436,21 @@ app.get("/sellers", (req, res) => {
   res.json(sellers);
 });
 
-app.get("/seller/:username", (req, res) => {
-  var username = req.params.username;
-  var filename = path.join(dir, `seller_${username}.html`);
-
-  if (fs.existsSync(filename)) {
-    res.sendFile(filename);
-  } else {
-    res.status(404).send("Seller page not found.");
-  }
+app.get("/seller/:username", async (req, res) => {
+	res.sendFile(path.join(dir,"seller.html"))
 });
 
+app.get("/api/seller/:username",async (req,res) =>{
+	var username = req.params.username
+	try{
+		var shelf = await getShelf(username)
+		shelf = shelf || []
+		res.json({username:username,shelf:shelf})
+	}catch(err){
+		console.log("Error in /api/seller/:username",err)
+		res.status(500).json({error:"Server endpoint error"})
+	}
+})
 /* 
 Function to start the Server and Database Connetion
 */
