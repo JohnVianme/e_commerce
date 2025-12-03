@@ -3,7 +3,7 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 
-const {MongoClient} = require("mongodb");
+const { MongoClient } = require("mongodb");
 
 const app = express();
 const port = 8080;
@@ -245,7 +245,7 @@ async function getShelf(name) {
   } catch (error) {
     console.log("Error: getShelf() ");
     console.log(error);
-	return []
+    return [];
   }
 }
 
@@ -286,64 +286,63 @@ async function addToShelf(name, item) {
   }
 }
 
-async function createSellerProfile(username){
-	try{
-		const coll = shopDB.collection("product")
-		const sellerProfile = {
-			name: username,
-			shelf:[]
-		}
-		await coll.insertOne(sellerProfile)
-		console.log(`Seller profile created for ${username}`)
-	} catch(err){
-		console.log('Error creating seller profile:',err)
-	}
+async function createSellerProfile(username) {
+  try {
+    const coll = shopDB.collection("product");
+    const sellerProfile = {
+      name: username,
+      shelf: [],
+    };
+    await coll.insertOne(sellerProfile);
+    console.log(`Seller profile created for ${username}`);
+  } catch (err) {
+    console.log("Error creating seller profile:", err);
+  }
 }
 
-function checkSession(username){
-	for (var i = 0; i < sessionList.length; i++){
-		var curr = sessionList[i]
-		if(curr.username == username){
-			return true
-		}
-	}
-	return false
-}
-
-function checkSeller(username){
-    for(var i=0;i<userList.length;i++){
-        var curr = userList[i]
-        if((curr.username==username)&&(curr.acctType=='seller')){
-            return true
-        }
+function checkSession(username) {
+  for (var i = 0; i < sessionList.length; i++) {
+    var curr = sessionList[i];
+    if (curr.username == username) {
+      return true;
     }
-    return false
+  }
+  return false;
 }
 
-function handleHome(req, res){
-	var username = null
-    
-	if (req.method == 'GET'){
-		username = req.query.Username
-	} else if (req.method == 'POST'){
-		if (req.body){
-			username = req.body.username
-		}
-	}
-	
-    if(username && checkSeller(username)&&checkSession(username)){
-        res.sendFile(path.join(dir, 'home_seller.html'))
+function checkSeller(username) {
+  for (var i = 0; i < userList.length; i++) {
+    var curr = userList[i];
+    if (curr.username == username && curr.acctType == "seller") {
+      return true;
     }
-    else{
-        res.sendFile(path.join(dir, 'home.html'))
-    }
+  }
+  return false;
 }
 
-app.get('/home', handleHome)
+function handleHome(req, res) {
+  var username = null;
 
-app.get('/', handleHome)
+  if (req.method == "GET") {
+    username = req.query.Username;
+  } else if (req.method == "POST") {
+    if (req.body) {
+      username = req.body.username;
+    }
+  }
 
-app.post('/home', express.json(), handleHome)
+  if (username && checkSeller(username) && checkSession(username)) {
+    res.sendFile(path.join(dir, "home_seller.html"));
+  } else {
+    res.sendFile(path.join(dir, "home.html"));
+  }
+}
+
+app.get("/home", handleHome);
+
+app.get("/", handleHome);
+
+app.post("/home", express.json(), handleHome);
 
 app.get("/about", (req, res) => {
   res.sendFile(path.join(dir, "about.html"));
@@ -355,6 +354,13 @@ app.get("/contact", (req, res) => {
 
 app.get("/add_item", (req, res) => {
   res.sendFile(path.join(dir, "add_item.html"));
+});
+
+/* POST for adding a item to a sellers store */
+app.post("/add_item", express.json(), (req, res) => {
+  let qr = req.body;
+  console.log(qr);
+  res.send("Item added");
 });
 
 app.post("/login", (req, res) => {
@@ -479,51 +485,49 @@ app.get("/sellers", (req, res) => {
 });
 
 app.get("/seller/:username", async (req, res) => {
-	res.sendFile(path.join(dir,"seller.html"))
+  res.sendFile(path.join(dir, "seller.html"));
 });
 
-app.get("/api/seller/:username",async (req,res) =>{
-	var username = req.params.username
-	try{
-		var shelf = await getShelf(username)
-		shelf = shelf || []
-		res.json({username:username,shelf:shelf})
-	}catch(err){
-		console.log("Error in /api/seller/:username",err)
-		res.status(500).json({error:"Server endpoint error"})
-	}
-})
+app.get("/api/seller/:username", async (req, res) => {
+  var username = req.params.username;
+  try {
+    var shelf = await getShelf(username);
+    shelf = shelf || [];
+    res.json({ username: username, shelf: shelf });
+  } catch (err) {
+    console.log("Error in /api/seller/:username", err);
+    res.status(500).json({ error: "Server endpoint error" });
+  }
+});
 
-app.post('/manage',express.json(),(req,res) => {
-	res.sendFile(path.join(dir,'manage.html'))
-})
+app.post("/manage", express.json(), (req, res) => {
+  res.sendFile(path.join(dir, "manage.html"));
+});
 
 /* 
 Function to start the Server and Database Connetion
 */
 async function loadServer() {
   try {
-    // start the server
-    app.listen(port, () => {
-      console.log("Server is running...");
-      console.log("Loading users...");
-      userList = loadUsers();
-      console.log(userList.length, "User(s) loaded!");
-    });
-
     // connect to the DB
     await MongoConnectAwait();
     console.log("Products:");
     await showProducts();
     console.log("Consumers:");
     await showConsumers();
+
+    // start the server
+    app.listen(port, async () => {
+      console.log("Server is running...");
+      console.log("Loading users...");
+      userList = await loadUsers();
+      console.log(userList.length, "User(s) loaded!");
+    });
   } catch (error) {
     // log issues with connecting`
     console.log("Unable to Connect to Server!");
     console.log(error);
   }
 }
-
-app
 
 loadServer();
