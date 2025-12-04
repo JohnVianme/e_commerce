@@ -350,7 +350,15 @@ app.get("/about", (req, res) => {
   res.sendFile(path.join(dir, "about.html"));
 });
 
+app.post("/about", express.json(), (req, res) => {
+  res.sendFile(path.join(dir, "about.html"));
+});
+
 app.get("/contact", (req, res) => {
+  res.sendFile(path.join(dir, "contact.html"));
+});
+
+app.post("/contact", express.json(), (req, res) => {
   res.sendFile(path.join(dir, "contact.html"));
 });
 

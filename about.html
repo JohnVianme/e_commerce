@@ -2,17 +2,43 @@
 <html>
     <head>
         <title>About Us</title>
+        <script>
+            function sendReq(url){
+                var username = window.localStorage.getItem('username')
+                var body = {}
+                if(username!=null){
+                    body = {'username': username}
+                }
+                fetch(url, {
+                    'method':'post',
+                    'headers': {'Content-Type':'application/json'},
+                    'body': JSON.stringify(body)
+                })
+                .then(function (res){
+                    return res.text()
+                })
+                .then(function (text){
+                    document.open()
+                    document.write(text)
+                    document.close()
+                })
+                .catch(function (err){
+                    console.log(err)
+                })
+            }
+        </script>
     </head>
     <body>
         <header>
             <h1>About Us</h1>
         </header>
         <nav>
-			<a href="/home">Home</a>
-			<a href="/about">About</a>
-			<a href="/contact">Contact</a>
-			<a href="/login">Login</a>
-		</nav>
+            <a onclick="sendReq('home')">Home</a>
+            <a onclick="sendReq('about')">About</a>
+            <a onclick="sendReq('contact')">Contact</a>
+            <a onclick="sendReq('login')">Login</a>
+            <a onclick="sendReq('manage')">Manage</a>
+        </nav>
         <div>
             <h2>E Commerce</h2>
             <p>Our website provides the ability for producers to upload 
