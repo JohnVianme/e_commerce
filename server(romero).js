@@ -216,8 +216,8 @@ async function getCart(name) {
   try {
     let coll = shopDB.collection("consumer");
     let consumer = await coll.findOne({ name: name });
-    let cart = consumer.cart;
     if (consumer) {
+      let cart = consumer.cart;
       return cart;
     } else {
       return null;
@@ -237,8 +237,8 @@ async function getShelf(name) {
   try {
     let coll = shopDB.collection("product");
     let producer = await coll.findOne({ name: name });
-    let shelf = producer.shelf;
     if (producer) {
+      let shelf = producer.shelf;
       return shelf;
     } else {
       return [];
@@ -296,6 +296,7 @@ async function createSellerProfile(username) {
     };
     await coll.insertOne(sellerProfile);
     console.log(`Seller profile created for ${username}`);
+    return true;
   } catch (err) {
     console.log("Error creating seller profile:", err);
   }
@@ -456,10 +457,10 @@ app.post("/create_acct", express.json(), async (req, res) => {
     let createdUser = null;
     if (acctType == "seller") {
       // add a new seller
-      const createdUser = await createSellerProfile(username);
+      createdUser = await createSellerProfile(username);
     } else {
       // add a new buyer
-      const createdUser = await addConsumer(username);
+      createdUser = await addConsumer(username);
     }
     if (createdUser) {
       res.send(`
