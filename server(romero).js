@@ -17,7 +17,7 @@ var sessionList = [];
 var userFile = "users.txt";
 var dir = __dirname;
 /*
-	------ start of functions ------
+------------- start of functions ------------------------
 */
 /*
 	Name: validateUserInfo
@@ -94,7 +94,7 @@ function checkLogin(username, password) {
 	Arguments: username: string - represents the username to write
 			   password: stirng/encrypted - represents the password to write
 			   acctType: string - represents the type of account for the user being written
-	Return: N/A
+	Return: N/A - appendes to specifed userFile (see 
 */
 function writeUser(username, password, acctType) {
   var userInfo = username + "," + password + "," + acctType + "\n";
@@ -105,6 +105,13 @@ function writeUser(username, password, acctType) {
   }
 }
 
+/*
+	Name: loadUsers
+	Purpose: reads from userFile, structures the lines into an object and pushs into 
+			 a list, returns the list to replace userList[].
+	Arguments: N/A -> reads the file specifed by userFile
+	Return: retList - a list of users => {username,pw,acctType}
+*/
 function loadUsers() {
   try {
     var userStr = fs.readFileSync(userFile, { encoding: "utf8" });
@@ -122,10 +129,23 @@ function loadUsers() {
   }
 }
 
+/*
+	Name: generateToken
+	Purpose: generate a random 16 bit token in a 'hex' string 
+	Arguments: N/A
+	return: a 16 bit random string that represents the users login token
+*/
 function generateToken() {
   return crypto.randomBytes(16).toString("hex");
 }
 
+/*
+	Name: getAcctType
+	Purpose: retrive the target user's account type (either buyer or seller)
+	Arguments: username - string - represents the target username to find
+	Return: acctType - string - represents the type of account related to the target username
+			null - if target username was not found
+*/
 function getAcctType(username) {
   for (var i = 0; i < userList.length; i++) {
     var curr = userList[i];
@@ -135,40 +155,13 @@ function getAcctType(username) {
   }
   return null;
 }
+
 /*
--------------Depercated function--------------
-function createSellerPage(username) {
-  var page = `
-		<!DOCTYPE html>
-		<html>
-			<head>
-				<title>${username}'s Store</title>
-			</head>
-			<body>
-				<header>
-					<h1>Welcome to ${username}'s Store</h1>
-				</header>
-				<nav>
-					<a href='/home'>Home</a>
-					<a href='/login'>Login</a>
-				</nav>
-				<p>THis is the default page for seller <strong>${username}</strong>.</p>
-				<p>Products and other info will go here later (from MongoDB).</p>
-			</body>
-		</html>
-		`;
-  var filename = path.join(dir, `seller_${username}.html`);
-  try {
-    fs.writeFileSync(filename, page, { encoding: "utf8" });
-    console.log("Creaet seller page for: ", username);
-  } catch (err) {
-    console.log("Error creating seller page: ", err);
-  }
-}
------------Depercated function---------------
-*/
-/*
-async await connection
+	**async function**
+	Name: MongoClientAwait
+	Purpose: establish the conection to the mongoDB Database
+	Arguments: N/A
+	Return: N/A - provides console.log replies to confirm connection
 */
 async function MongoConnectAwait() {
   try {
@@ -181,7 +174,13 @@ async function MongoConnectAwait() {
   }
 }
 
-// show consumers collections
+/*
+	**async function**
+	Name: showConsumers
+	Purpose: pulls from db the consumer collection 
+	Arguments: N/A
+	Return: N/A - console logs the data returned by db or error if failed
+*/
 async function showConsumers() {
   try {
     const consumers = shopDB.collection("consumer");
@@ -192,7 +191,13 @@ async function showConsumers() {
   }
 }
 
-// show products collections
+/*
+	**async function**
+	Name: showProducts
+	Purpose: pulls from db the product collection
+	Arguements: N/A
+	Return: N/A - console logs the data returned by the db or error if failed
+*/
 async function showProducts() {
   try {
     const producers = shopDB.collection("product");
@@ -204,11 +209,11 @@ async function showProducts() {
 }
 
 /*
-Helper to add a consumer obejct:
-Type Consumer:
-name: string
-cart: list of objects to buy
-purchased: list of objects baught- (could be uneeded)
+	Helper to add a consumer obejct:
+	Type Consumer:
+	name: string
+	cart: list of objects to buy
+	purchased: list of objects baught- (could be uneeded)
 */
 async function addConsumer(name) {
   try {
@@ -224,9 +229,9 @@ async function addConsumer(name) {
 }
 
 /*
-Function to add an item to a users cart
-@name = a username for a user
-@item = a product object: {name : name, price: price, seller: seller, description: description}
+	Function to add an item to a users cart
+	@name = a username for a user
+	@item = a product object: {name : name, price: price, seller: seller, description: description}
 */
 async function addToCart(name, item) {
   try {
@@ -243,9 +248,9 @@ async function addToCart(name, item) {
 }
 
 /*
-Function to gets items from a users cart
-@name = a username for a user
-@return: list of items
+	Function to gets items from a users cart
+	@name = a username for a user
+	@return: list of items
 */
 async function getCart(name) {
   try {
@@ -264,9 +269,9 @@ async function getCart(name) {
 }
 
 /*
-Function to gets items from a users shelf
-@name = a username for a user
-@return: list of items
+	Function to gets items from a users shelf
+	@name = a username for a user
+	@return: list of items
 */
 async function getShelf(name) {
   try {
@@ -286,10 +291,10 @@ async function getShelf(name) {
 }
 
 /*
-Helper to add a producer obejct:
-Type Product:
-name: string
-shelf: list of things to sell
+	Helper to add a producer obejct:
+	Type Product:
+	name: string
+	shelf: list of things to sell
 */
 async function addProducer(name) {
   try {
@@ -304,9 +309,9 @@ async function addProducer(name) {
 }
 
 /*
-Function to add an item to a users shelf
-@name = a username for a user
-@item = a product object: {name : name, price: price, seller: seller, description: description}
+	Function to add an item to a users shelf
+	@name = a username for a user
+	@item = a product object: {name : name, price: price, seller: seller, description: description}
 */
 async function addToShelf(name, item) {
   try {
@@ -330,6 +335,14 @@ async function addToShelf(name, item) {
   }
 }
 
+/*
+	**async function**
+	Name: createSellerProfile
+	Purpose: get the "product" collection (sellers) and adds a new profile to the collection
+	Arguments: username - string - reperesents the username of the new profile to add to the collection
+	Return: true - if profile was created 
+			null - console logs if error occured
+*/
 async function createSellerProfile(username) {
   try {
     const coll = shopDB.collection("product");
@@ -345,6 +358,10 @@ async function createSellerProfile(username) {
   }
 }
 
+/*
+	Name: checkSession
+	Purpose: check if username exists in 
+*/
 function checkSession(username) {
   for (var i = 0; i < sessionList.length; i++) {
     var curr = sessionList[i];
@@ -375,9 +392,7 @@ function handleHome(req, res) {
 	  username = req.body.username;
 	}
 	}
-	console.log(username)
-	console.log(checkSeller(username))
-	console.log(checkSession(username))
+	
 	if (username && checkSeller(username) && checkSession(username)) {
 		console.log('home_seller endpoint')
 		res.sendFile(path.join(dir, "home_seller.html"));
