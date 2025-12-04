@@ -5,13 +5,13 @@ const fs = require("fs");
 const crypto = require("crypto");
 const { MongoClient } = require("mongodb");
 const { ObjectId } = require("mongodb");
-//baselines
+//baselines/globals
 const app = express();
 const port = 8080;
 const URL = "mongodb://localhost:27017";
 const client = new MongoClient(URL);
 let shopDB;
-//local data structures
+//local data structures/files/directory
 var userList = [];
 var sessionList = [];
 var userFile = "users.txt";
@@ -23,7 +23,7 @@ var dir = __dirname;
 	Name: validateUserInfo
 	Purpose: A server side solution to user provided data screening
 	Arguments: username: string - represents username to validateUserInfo
-			   password: a 16 bit encrypted 'hex' represenation of the users password
+			   password: string - representation of the password before applying encryption
 	Return: True: if username and password meet requirements
 			False: otherwise
 */
@@ -630,8 +630,6 @@ app.get("/seller/:username", async (req, res) => {
   res.sendFile(path.join(dir, "seller.html"));
 });
 
-
-
 app.get("/api/seller/:username", async (req, res) => {
   var username = req.params.username;
   try {
@@ -683,7 +681,5 @@ async function loadServer() {
     console.log(error);
   }
 }
-
-
 
 loadServer();
