@@ -360,7 +360,10 @@ async function createSellerProfile(username) {
 
 /*
 	Name: checkSession
-	Purpose: check if username exists in 
+	Purpose: check if username exists in sessionList
+	Arguements: username - string - represents the the target Username
+	Return: true - if username found in sessionList
+			false - otherwise
 */
 function checkSession(username) {
   for (var i = 0; i < sessionList.length; i++) {
@@ -372,6 +375,13 @@ function checkSession(username) {
   return false;
 }
 
+/*
+	Name: checkSeller
+	Purpose: check is user is a seller account
+	Arguments: username - string - represents the target Username
+	Return: True - if user was found and account type is a Seller
+			False - otherwise
+*/
 function checkSeller(username) {
   for (var i = 0; i < userList.length; i++) {
     var curr = userList[i];
@@ -382,6 +392,15 @@ function checkSeller(username) {
   return false;
 }
 
+/*
+	Name: handleHome
+	Purpose: manage user traffic to '/' or '/home', determine if user is 
+			 seller or buyer, gives access to manage tab as appropriate
+	Arguements: req - the req body to pull params (checks if req was generated 
+	                  as a post or get call
+				res - the severs response to request, traffics to correct home page
+	Return: N/A - uses the res out param to direct traffic
+*/
 function handleHome(req, res) {
 	var username = null;
 
@@ -401,7 +420,13 @@ function handleHome(req, res) {
 		res.sendFile(path.join(dir, "home.html"));
 	}
 }
+/*
+-----------End of Functions----------------------
+*/
 
+/*
+---------Start of endpoint management------------
+*/
 app.get("/home", handleHome);
 
 app.get("/", handleHome);
@@ -622,7 +647,10 @@ app.get("/api/seller/:username", async (req, res) => {
 app.post("/manage", express.json(), (req, res) => {
   res.sendFile(path.join(dir, "manage.html"));
 });
-
+/*
+----------- End of endpoint managment-----------
+*/
+//----------Sever Init below-------------------//
 /* 
 Function to start the Server and Database Connetion
 */
