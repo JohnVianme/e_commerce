@@ -288,11 +288,11 @@ async function addToShelf(name, item) {
     );
     console.log(itemWithId);
     console.log(`Added to ${name}'s Shelf!`);
-    return true
+    return true;
   } catch (error) {
     console.log("Error: addToShelf() ");
     console.log(error);
-    return false
+    return false;
   }
 }
 
@@ -440,6 +440,33 @@ app.post("/lgn_action", express.json(), (req, res) => {
 					window.location.href = '/login'
 				</script>
 			`);
+  }
+});
+
+// buyer trys to buy an item
+app.post("/api/cart/add", express.json(), async (req, res) => {
+  console.log("About to try and add to cart:", req.body);
+  const qr = req.body;
+  const buyerName = qr.username;
+  const itemId = qr.itemId;
+  const sellerName = qr.seller;
+  try {
+    const shelf = await getShelf(sellerName);
+    if (!shelf) {
+      return res.json({ message: "Seller not found." });
+    }
+    const objectId = new ObjectId(itemId);
+    const item = shelf.find((it) => it._id.equals(objectId));
+    if (!item) {
+      return res.json({ message: "Item not found in seller's shelf." });
+    }
+    const result = await addToCart(buyerName, item);
+    if (!result) {
+      return res.json({ message: "Could not add to cart" });
+    }
+    res.json({ message: "Item added to Cart!" });
+  } catch (err) {
+    console.log("Error: post at  /api/cart/add");
   }
 });
 
