@@ -332,21 +332,25 @@ function checkSeller(username) {
 }
 
 function handleHome(req, res) {
-  var username = null;
+	var username = null;
 
-  if (req.method == "GET") {
-    username = req.query.Username;
-  } else if (req.method == "POST") {
-    if (req.body) {
-      username = req.body.username;
-    }
-  }
-
-  if (username && checkSeller(username) && checkSession(username)) {
-    res.sendFile(path.join(dir, "home_seller.html"));
-  } else {
-    res.sendFile(path.join(dir, "home.html"));
-  }
+	if (req.method == "GET") {
+	username = req.query.username;
+	} else if (req.method == "POST") {
+	if (req.body) {
+	  username = req.body.username;
+	}
+	}
+	console.log(username)
+	console.log(checkSeller(username))
+	console.log(checkSession(username))
+	if (username && checkSeller(username) && checkSession(username)) {
+		console.log('home_seller endpoint')
+		res.sendFile(path.join(dir, "home_seller.html"));
+	} else {
+		console.log('home endpoint')
+		res.sendFile(path.join(dir, "home.html"));
+	}
 }
 
 app.get("/home", handleHome);
