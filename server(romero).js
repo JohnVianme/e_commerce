@@ -4,6 +4,7 @@ const fs = require("fs");
 const crypto = require("crypto");
 
 const { MongoClient } = require("mongodb");
+const { ObjectId } = require("mongodb");
 
 const app = express();
 const port = 8080;
@@ -223,7 +224,7 @@ async function getCart(name) {
       return null;
     }
   } catch (error) {
-    console.log("Error: addToCart() ");
+    console.log("Error: getCart() ");
     console.log(error);
   }
 }
@@ -276,14 +277,22 @@ Function to add an item to a users shelf
 async function addToShelf(name, item) {
   try {
     const coll = shopDB.collection("product");
+    // add id for each item
+    const itemWithId = {
+      _id: new ObjectId(), // new id field
+      ...item, // keep all of the old info
+    };
     const res = await coll.updateOne(
       { name: name },
-      { $addToSet: { shelf: item } }
+      { $addToSet: { shelf: itemWithId } }
     );
+    console.log(itemWithId);
     console.log(`Added to ${name}'s Shelf!`);
+    return true
   } catch (error) {
     console.log("Error: addToShelf() ");
     console.log(error);
+    return false
   }
 }
 
@@ -370,7 +379,6 @@ app.get("/add_item", (req, res) => {
 app.post("/add_item", express.json(), async (req, res) => {
   console.log("About to add an item!");
   let qr = req.body;
-  console.log(qr);
   // add to the sellers data base
   let result = await addToShelf(qr.seller, qr);
   if (result) {
