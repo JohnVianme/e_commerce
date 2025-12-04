@@ -647,6 +647,14 @@ app.get("/api/seller/:username", async (req, res) => {
 app.post("/manage", express.json(), (req, res) => {
   res.sendFile(path.join(dir, "manage.html"));
 });
+
+app.get("/shopping_cart", (req,res) => {
+	res.sendFile(path.join(dir,"shopping_cart.html"))
+})
+
+app.post("/shopping_cart", (req,res) => {
+	res.sendFile(path.join(dir,"shopping_cart.html"))
+})
 /*
 ----------- End of endpoint managment-----------
 */
