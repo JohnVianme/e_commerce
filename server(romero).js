@@ -1,22 +1,32 @@
+//imports/packages
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
-
 const { MongoClient } = require("mongodb");
 const { ObjectId } = require("mongodb");
-
+//baselines
 const app = express();
 const port = 8080;
 const URL = "mongodb://localhost:27017";
 const client = new MongoClient(URL);
 let shopDB;
-
+//local data structures
 var userList = [];
 var sessionList = [];
 var userFile = "users.txt";
 var dir = __dirname;
-
+/*
+	------ start of functions ------
+*/
+/*
+	Name: validateUserInfo
+	Purpose: A server side solution to user provided data screening
+	Arguments: username: string - represents username to validateUserInfo
+			   password: a 16 bit encrypted 'hex' represenation of the users password
+	Return: True: if username and password meet requirements
+			False: otherwise
+*/
 function validateUserInfo(username, password) {
   if (password.length < 6 || password.length > 13) {
     return false;
@@ -38,6 +48,14 @@ function validateUserInfo(username, password) {
   return true;
 }
 
+/*
+	Name: checkUsers
+	Purpose: check if an account with username and account type already exists
+	Arguemnts: username: string - represents the Username
+			   acctType: string - either (buyer/seller) - Depercated
+	Return: True - if username does not exist already
+			False - otherwise
+*/
 function checkUsers(username, acctType) {
   if (userList.length == 0) {
     return true;
@@ -52,6 +70,14 @@ function checkUsers(username, acctType) {
   return true;
 }
 
+/*
+	Name: checkLogin
+	Purpose: checks to see if the provided username and password match 
+	Arguments: username: string - represents the target username to Login
+			   password: string/encrypted - represents the hashed target password
+	Return: True - if the provided username and password match a known user
+			False - otherwise
+*/
 function checkLogin(username, password) {
   for (var i = 0; i < userList.length; i++) {
     var curr = userList[i];
@@ -62,6 +88,14 @@ function checkLogin(username, password) {
   return false;
 }
 
+/*
+	Name: writeUser
+	Purpose: writes the username, passsword, and acctType to a simple .txt file
+	Arguments: username: string - represents the username to write
+			   password: stirng/encrypted - represents the password to write
+			   acctType: string - represents the type of account for the user being written
+	Return: N/A
+*/
 function writeUser(username, password, acctType) {
   var userInfo = username + "," + password + "," + acctType + "\n";
   try {
@@ -556,6 +590,8 @@ app.get("/seller/:username", async (req, res) => {
   res.sendFile(path.join(dir, "seller.html"));
 });
 
+
+
 app.get("/api/seller/:username", async (req, res) => {
   var username = req.params.username;
   try {
@@ -596,5 +632,7 @@ async function loadServer() {
     console.log(error);
   }
 }
+
+
 
 loadServer();
