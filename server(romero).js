@@ -544,11 +544,17 @@ app.post("/add_item", express.json(), async (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  console.log("Post Endpoint /login ")
   res.sendFile(path.join(dir, "login.html"));
 });
 
 app.get("/login", (req, res) => {
+  console.log("Get Endpoint /login ")
   res.sendFile(path.join(dir, "login.html"));
+});
+
+app.get("/source.js", (req, res) => {
+  res.sendFile(path.join(dir, "source.js"));
 });
 
 /*
@@ -556,9 +562,16 @@ Endpoint for a user to logout, we consider it being logged out if localStorage
 and sessionList does not contain the user.
 */
 app.get("/logout/:username", async (req, res) => {
+  console.log("Logout Endpoint");
+  console.log("User: ", req.params.username);
+  console.log("URL: ", req.url);
+  console.log("seassionList: ", sessionList);
+  const result = removeSessionUser(req.params.username);
+  console.log("result: ", result);
+
   // try to remove the user
-  if (!removeSessionUser(req.params.username)) {
-    console.log("ERROR, unable to remove from session:", username);
+  if (!result) {
+    console.log("ERROR, unable to remove from session:", req.params.username);
     return res.status(500).json({
       status: "error",
       message: "Invalid username, unable to log out. Are you logged in?",

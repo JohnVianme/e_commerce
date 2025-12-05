@@ -1,13 +1,26 @@
-function logout(username) {
-  fetch(`logout/${localStorage.getItem("username")}`)
-    .then((res) => res.json())
+function logout() {
+  const username = localStorage.getItem("username");
+  if (!username) {
+    alert("You need to login!");
+    window.location.href = "/";
+    return;
+  }
+  fetch(`logout/${username}`)
     .then((res) => {
-      if (!res.ok) {
-        return res.message;
+      console.log(res);
+      return res.json();
+    })
+    .then((data) => {
+      if (!data.ok) {
+        // clear local storate
+        localStorage.clear();
+        alert(data.message);
+        window.location.href = "/";
+        return;
       } else {
         // clear local storate
         localStorage.clear();
-        return res.message;
+        return data.message;
       }
     })
     .catch((err) => {
