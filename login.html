@@ -1,87 +1,118 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<link rel="stylesheet" href="/styles.css">
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-		<title>Login</title>
-		<script>
-			function sendReq(url){
-				var username = document.getElementById('username').value
-				var password = document.getElementById('password').value
-				var acctTypeRadios = document.querySelectorAll('.type')
-				console.log(`username: ${username}, password: ${password}`)
-				var acctType = null
-				
-				for (var i = 0; i < acctTypeRadios.length; i++){
-					var radio = acctTypeRadios[i]
-					if (radio.checked){
-						if(radio.id == 'customer_type'){
-							acctType = 'customer'
-						} else if (radio.id == 'seller_type'){
-							acctType = 'seller'
-						}
-						break
-					}
-				}
-				
-				if (!acctType){
-					alert('Please select your account type.')
-					return
-				}
-				console.log(`acct_type: ${acctType}`)
-				
-				var body = {}
-				if (username != null){
-					body = {'username': username, 'password': password, 
-							'acct_type': acctType}
-				}
-				fetch(url, {
-					'method':'post',
-					'headers':{'Content-Type':'application/json'},
-					'body': JSON.stringify(body)
-				})
-				.then((res)=>{
-					return res.text()
-				})
-				.then((text)=>{
-					document.open()
-					document.write(text)
-					document.close()
-				})
-				.catch((err)=>{
-					console.log(err)
-				})
-			}
-		</script>
-	</head>
-	<body>
-		<header>
-			<h1>Login</h1>
-		</header>
-        <nav>
-			<a href="/home">Home</a>
-			<a href="/about">About</a>
-			<a href="/contact">Contact</a>
-			<a href="/login">Login</a>
-		</nav>
-		<form method="post">
-			<label for="username">
-				Username: <input type="text" name="username" id="username">
-			</label><br>
-			<label for="password">
-				Password: <input type="password" name="password" id="password">
-			</label><br>
-				Account type:
-				<label for="customer_type">
-				Customer <input type="radio" name="acct_type" id="customer_type" class="type" checked>
-				</label>
-				<label for="seller_type">
-				Seller <input type="radio" name="acct_type" id="seller_type" class="type">
-				</label><br>
-			<input type="button" value="Login" id="submit" onclick="sendReq('lgn_action')">
-			<input type="button" value="Create New Account" id="submit" onclick="sendReq('create_acct')">
-		</form>
-	</body>
+  <head>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Login</title>
+    <script>
+      function sendReq(url) {
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var acctTypeRadios = document.querySelectorAll(".type");
+        console.log(`username: ${username}, password: ${password}`);
+        var acctType = null;
+
+        for (var i = 0; i < acctTypeRadios.length; i++) {
+          var radio = acctTypeRadios[i];
+          if (radio.checked) {
+            if (radio.id == "customer_type") {
+              acctType = "customer";
+            } else if (radio.id == "seller_type") {
+              acctType = "seller";
+            }
+            break;
+          }
+        }
+
+        if (!acctType) {
+          alert("Please select your account type.");
+          return;
+        }
+        console.log(`acct_type: ${acctType}`);
+
+        var body = {};
+        if (username != null) {
+          body = {
+            username: username,
+            password: password,
+            acct_type: acctType,
+          };
+        }
+        fetch(url, {
+          method: "post",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        })
+          .then((res) => {
+            return res.text();
+          })
+          .then((text) => {
+            document.open();
+            document.write(text);
+            document.close();
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>Login</h1>
+    </header>
+    <nav>
+      <a href="/home">Home</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+      <a href="/login">Login</a>
+      <!-- <a href="sendReq('/login')">Login</a> -->
+    </nav>
+    <form method="post">
+      <label for="username">
+        Username: <input type="text" name="username" id="username" /> </label
+      ><br />
+      <label for="password">
+        Password:
+        <input type="password" name="password" id="password" /> </label
+      ><br />
+      Account type:
+      <label for="customer_type">
+        Customer
+        <input
+          type="radio"
+          name="acct_type"
+          id="customer_type"
+          class="type"
+          checked
+        />
+      </label>
+      <label for="seller_type">
+        Seller
+        <input
+          type="radio"
+          name="acct_type"
+          id="seller_type"
+          class="type"
+        /> </label
+      ><br />
+      <input
+        type="button"
+        value="Login"
+        id="submit"
+        onclick="sendReq('lgn_action')"
+      />
+      <input
+        type="button"
+        value="Create New Account"
+        id="submit"
+        onclick="sendReq('create_acct')"
+      />
+    </form>
+  </body>
 </html>

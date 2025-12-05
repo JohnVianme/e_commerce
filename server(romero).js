@@ -290,6 +290,34 @@ async function getCart(name) {
 }
 
 /*
+	Function to gets items from a users purchased
+	@name = a username for a user
+	@return: list of items
+*/
+async function getPurchased(name) {
+  if (!validUserSession(name)) {
+    console.log("Invalid Session Login for: ", name);
+    console.log("Session List", sessionList);
+    console.log("User List", userList);
+    return null;
+  }
+  try {
+    let coll = shopDB.collection("consumer");
+    let consumer = await coll.findOne({ name: name });
+    if (consumer) {
+      let purchased = consumer.purchased;
+      return purchased;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.log("Error: getPurchased() ");
+    console.log(error);
+    return null;
+  }
+}
+
+/*
 	Name: removeFromCart
 	Purpose: remove an item from a users cart within the db collection
 	Arguements: name: string - represents the target user profile Name
@@ -523,10 +551,12 @@ function checkSeller(username) {
 */
 function handleHome(req, res) {
   var username = null;
-
+  // error here, GET for login link does not add the username to hyperlink
   if (req.method == "GET") {
+    console.log("HandleHome is using GET");
     username = req.query.username;
   } else if (req.method == "POST") {
+    console.log("HandleHome is using POST");
     if (req.body) {
       username = req.body.username;
     }
@@ -534,8 +564,14 @@ function handleHome(req, res) {
 
   if (username && checkSeller(username) && checkSession(username)) {
     console.log("home_seller endpoint");
+    console.log(
+      `HandleHome thinks you are ${username} and are seller and on the session list!`
+    );
     res.sendFile(path.join(dir, "home_seller.html"));
   } else {
+    console.log(
+      `HandleHome thinks you are ${username}  and are not a seller and are not on the session list!`
+    );
     console.log("home endpoint");
     res.sendFile(path.join(dir, "home.html"));
   }
@@ -841,6 +877,28 @@ app.get("/shopping_cart", (req, res) => {
   res.sendFile(path.join(dir, "shopping_cart.html"));
 });
 
+// You can only get you bought items, nothing else
+app.post("/purchased", (req, res) => {
+  res.sendFile(path.join(dir, "purchased.html"));
+});
+
+app.get("/api/purchased/:username", async (req, res) => {
+  console.log("GET /api/purchased/:username endpoint");
+  const username = req.params.username;
+  try {
+    const purchased = (await getPurchased(username)) || [];
+    console.log("getPurchased:", purchased);
+    // const cartStringIDS = purchased.map((item) => ({
+    //   ...item,
+    //   _id: item._id ? item._id.toString() : null,
+    // }));
+    return res.status(200).json({ username: username, purchased: purchased });
+  } catch (err) {
+    console.log("Error in GET /api/cart/:username", err);
+    res.status(500).json({ error: "Server endpoint error" });
+  }
+});
+
 app.post("/shopping_cart", (req, res) => {
   res.sendFile(path.join(dir, "shopping_cart.html"));
 });
@@ -892,15 +950,15 @@ app.post("/api/cart/purchase", express.json(), async (req, res) => {
   try {
     const check = await purchaseCart(username);
     if (!check) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "No items to purchase or error occured",
       });
     }
-    res.json({ success: true });
+    return res.status(200).json({ success: true });
   } catch (err) {
     console.log("Error in POST /api/cart/purchase", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
