@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="stylesheet" href="styles.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 		<title>Login</title>
 		<script>
 			function sendReq(url){
@@ -69,15 +73,15 @@
 			<label for="password">
 				Password: <input type="password" name="password" id="password">
 			</label><br>
-			Account type:
+				Account type:
 				<label for="customer_type">
 				Customer <input type="radio" name="acct_type" id="customer_type" class="type">
 				</label>
 				<label for="seller_type">
 				Seller <input type="radio" name="acct_type" id="seller_type" class="type">
 				</label><br>
-			<input type="button" value="Login" onclick="sendReq('lgn_action')">
-			<input type="button" value="Create New Accout" onclick="sendReq('create_acct')">
+			<input type="button" value="Login" id="submit" onclick="sendReq('lgn_action')">
+			<input type="button" value="Create New Account" id="submit" onclick="sendReq('create_acct')">
 		</form>
 	</body>
 </html>
