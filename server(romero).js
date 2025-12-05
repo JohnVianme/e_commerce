@@ -680,10 +680,12 @@ app.get("/logout/:username", async (req, res) => {
     console.log("ERROR, unable to remove from session:", req.params.username);
     return res.status(500).json({
       ok: false,
-      message: "Invalid username, unable to log out. Are you logged in?",
+      message: `Invalid username ${req.params.username}, unable to log out. Are you logged in?`,
     });
   }
-  return res.status(200).json({ ok: true, message: "Success loggin out!" });
+  return res
+    .status(200)
+    .json({ ok: true, message: `Success loggin ${req.params.username} out!` });
 });
 
 app.post("/lgn_action", express.json(), (req, res) => {

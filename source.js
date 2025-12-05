@@ -16,10 +16,12 @@ function logout() {
         localStorage.clear();
         alert(data.message);
         window.location.href = "/";
+        alert(data.message || "Logout Failed, are you logged in?");
         return;
       } else {
         // clear local storate
         localStorage.clear();
+        alert(data.message || "Logout Success!");
         return data.message;
       }
     })
