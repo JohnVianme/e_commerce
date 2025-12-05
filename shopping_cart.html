@@ -4,18 +4,119 @@
 		<title>Shoping Cart</title>
 		<script>
 			function initPage(){
-				//fetch request to pull username and cart from db
-				//build a list of <li>s appended to the ul similar to 
-				//sellers store front, add a check box to pass to the
-				//call to rm_item() 
+				var username = window.localStorage.getItem('username')
+				var acctType = window.localStorage.getItem('acctType')
+				
+				if(!username){
+					alert('You must be logged in to view your cart.')
+					window.location.href = '/login'
+					return
+				}
+				var header = document.getElementById('cart_header')
+				header.innerText = username + "'s Shopping Cart"
+				
+				var list = document.getElementById('cartList')
+				list.innerHTML = "<li>Loading cart...</li>"
+				
+				fetch("/api/cart/" + encodeURIComponent(username),{method:"get"})
+				.then(function (res){
+					return res.json()
+				})
+				.then(function (data){
+					var cart = data.cart || []
+					list.innerHTML = ""
+					
+					if(cart.length == 0){
+						list.innerHTML = "<li>Your cart is empty.</li>"
+						return
+					}
+					
+					for(var i = 0; i < cart.length; i++){
+						var item = cart[i]
+						var li = document.createElement("li")
+						var text = item.name || "Unnamed Product"
+						if(item.price != undefined){
+							text += " - $" + item.price
+						}
+						if(item.description){
+							text += " (" + item.description + ")"
+						}
+						
+						var span = document.createElement("span")
+						span.innerText = text + " "
+						
+						var btn = document.createElement("button")
+						btn.innerText = "Remove"
+						(function (id) {
+							btn.onclick = function (){
+								rm_item(id)
+							}
+						})(item._id)
+						
+						li.appendChild(span)
+						li.appendChild(btn)
+						list.appendChild(li)
+					}
+				})
+				.catch(function (err){
+					console.log(err)
+					list.innerHTML = "<li>Error fetching cart.</li>"
+				})
 			}
-			function rm_item(){
-				//checks the check box list and determine if its a rm one or rm many
-				//api call
-				//fetch request to /api/cart/ to remove one.
+			function rm_item(itemId){
+				var username = window.localStorage.getItem('username')
+				if(!username){
+					alert("You must be logged in to view your cart")
+					window.location.href = '/login'
+					return
+				}
+				fetch('/api/cart/remove',{
+					method: "post",
+					headers:{"Content-Type":"application/json"},
+					body: JSON.stringify({username:username, itemId:itemId}),
+				})
+				.then(function(res){
+					return res.json()
+				})
+				.then(function(data){
+					if(data.success){
+						initPage()
+					}else{
+						alert(data.message || "Error: unable to remove item.")
+					}
+				})
+				.catch(function(err){
+					console.log(err)
+					alert("Error removing item.")
+				})
 			}
 			function purchase(){
-				//dummy code to "complete" transaction goes here
+				var username = window.localStorage.getItem('username')
+				if(!username){
+					alert('You must be logged in to view cart.')
+					window.location.href = '/login'
+					return
+				}
+				fetch("/api/cart/purchase",{
+					method:"post",
+					headers:{"Content-Type":"application/json"},
+					body: JSON.stringify({username:username})
+				})
+				.then(function(res){
+					return res.json()
+				})
+				.then(function(data){
+					if(data.success){
+						alert("Purcase complete! Thank you for your order.")
+						initPage()
+					} else {
+						alert(data.message || "Unable to complete your purchase.")
+					}
+				})
+				.catch(function(err){
+					console.log(err)
+					alert('Error completing purchase.')
+				})
 			}
 		</script>
 	</head>
@@ -31,9 +132,8 @@
 		<div>
 			<ul id="cartList">
 				<li>No products in your shopping cart yet! Please feel free to browse from our wonderfull sellers!</li>
-			<ul>
+			</ul>
 		</div>
-		<input type="button" onclick="rm_item()" value="Remove item">
 		<input type="button" onclick="purchase()" value="Check out">
 		<footer>
 		</footer>

@@ -241,9 +241,11 @@ async function addToCart(name, item) {
       { $addToSet: { cart: item } }
     );
     console.log(`Added to ${name}'s Cart!`);
+	return res.modifiedCount > 0
   } catch (error) {
     console.log("Error: addToCart() ");
     console.log(error);
+	return false
   }
 }
 
@@ -268,6 +270,65 @@ async function getCart(name) {
   }
 }
 
+/*
+	Name: removeFromCart
+	Purpose: remove an item from a users cart within the db collection
+	Arguements: name: string - represents the target user profile Name
+				itemID: string - represents the item id found in the collection
+	Return: True - if item was updated and removed
+			False - if no modification occured or if error was caught
+*/
+async function removeFromCart(name, itemID){
+	try{
+		const coll = shopDB.collection("consumer")
+		const objectId = new ObjectId(itemID)
+		const res = await coll.updateOne(
+			{name:name},
+				{$pull:{cart:{_id:objectId}}}
+		)
+		console.log(`Removed from ${name}'s cart: ${itemID}`)
+		return res.modifiedCount > 0
+	}catch(err){
+		console.log("Error: removeFromCart()")
+		console.log(err)
+		return false
+	}
+}
+
+/*
+	Name: purchaseCart
+	Purpose: handle the back end request to purchse when /api/purchase is routed to
+	Arguments: name - string - represents the user who's cart is being purchased
+	Return: True - if a modification occured with in the DB collection
+			False - if no modification or error occured
+*/
+async function purchaseCart(name){
+	try{
+		const coll = shopDB.collection('consumer')
+		const consumer = await coll.findOne({name:name})
+		
+		if(!consumer || !consumer.cart || consumer.cart.length == 0){
+			return false
+		}
+		
+		const cartItems = consumer.cart
+		
+		const res = await coll.updateOne(
+		{name:name},
+		{
+			$push: {purchased: {$each:cartItems}},
+			$set: {cart:[]}
+		}
+		)
+		
+		console.log(`Purchased cart for ${name}`)
+		return res.modifiedCount > 0 
+	}catch(err){
+		console.log("Error: purchaseCart()")
+		console.log(err)
+		return false
+	}
+}
 /*
 	Function to gets items from a users shelf
 	@name = a username for a user
@@ -653,6 +714,64 @@ app.get("/shopping_cart", (req,res) => {
 app.post("/shopping_cart", (req,res) => {
 	res.sendFile(path.join(dir,"shopping_cart.html"))
 })
+
+app.get("/api/cart/:username",async(req,res)=>{
+	const username = req.params.username
+	try{
+		const cart = (await getCart(username)) || []
+		
+		const cartStringIDS = cart.map((item)=>({
+			...item,
+			_id: item._id ? item._id.toString() : null,
+		}))
+		res.json({username:username, cart:cartStringIDS})
+	}catch(err){
+		console.log("Error in GET /api/cart/:username",err)
+		res.status(500).json({error:"Server endpoint error"})
+	}
+})
+
+app.post("/api/cart/remove",express.json(),async(req,res)=>{
+	const { username, itemId } = req.body
+	
+	if(!username || !itemId){
+		return res.status(400).json({success:false,message:"missing data"})
+	}
+	
+	try{
+		const check = await removeFromCart(username, itemId)
+		if(!check){
+			return res.json({success:false,message:"Could not remove item."})
+		}
+		res.json({success:true})
+	}catch(err){
+		console.log("Error in POST /api/cart/remove",err)
+		res.status(500).json({success:false,message:"Server error"})
+	}
+})
+
+app.post("/api/cart/purchase",express.json(),async(req,res)=>{
+	const { username } = req.body
+	
+	if(!username){
+		return res.status(400).json({success:false,message:"Missing user"})
+	}
+	
+	try{
+		const check = await purchaseCart(username)
+		if(!check){
+			return res.json({
+				success: false,
+				message: "No items to purchase or error occured",
+			})
+		}
+		res.json({success:true})
+	}catch(err){
+		console.log("Error in POST /api/cart/purchase", err)
+		res.status(500).json({success:false,message:"Server error"})
+	}
+})
+	
 /*
 ----------- End of endpoint managment-----------
 */
