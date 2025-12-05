@@ -436,6 +436,10 @@ function checkSession(username) {
   return false;
 }
 
+function removeUser(username){
+  
+}
+
 /*
 	Name: checkSeller
 	Purpose: check is user is a seller account
@@ -463,23 +467,23 @@ function checkSeller(username) {
 	Return: N/A - uses the res out param to direct traffic
 */
 function handleHome(req, res) {
-	var username = null;
+  var username = null;
 
-	if (req.method == "GET") {
-	username = req.query.username;
-	} else if (req.method == "POST") {
-	if (req.body) {
-	  username = req.body.username;
-	}
-	}
-	
-	if (username && checkSeller(username) && checkSession(username)) {
-		console.log('home_seller endpoint')
-		res.sendFile(path.join(dir, "home_seller.html"));
-	} else {
-		console.log('home endpoint')
-		res.sendFile(path.join(dir, "home.html"));
-	}
+  if (req.method == "GET") {
+    username = req.query.username;
+  } else if (req.method == "POST") {
+    if (req.body) {
+      username = req.body.username;
+    }
+  }
+
+  if (username && checkSeller(username) && checkSession(username)) {
+    console.log("home_seller endpoint");
+    res.sendFile(path.join(dir, "home_seller.html"));
+  } else {
+    console.log("home endpoint");
+    res.sendFile(path.join(dir, "home.html"));
+  }
 }
 /*
 -----------End of Functions----------------------
@@ -533,6 +537,28 @@ app.post("/login", (req, res) => {
 
 app.get("/login", (req, res) => {
   res.sendFile(path.join(dir, "login.html"));
+});
+
+app.get("/logout/:username", async (req, res) => {
+  const username = req.params.username;
+  if (!checkSession(username)) {
+    return res.status(400).json({
+      status: "error",
+      message: "Invalid username, unable to log out",
+    });
+  } else {
+    const removeSuccess = removeUser(username);
+    if (removeSuccess) {
+      return res
+        .status(200)
+        .json({ status: "ok", message: "Success loggin out!" });
+    } else {
+      return res.status(400).json({
+        status: "error",
+        message: "Unable to loggout please try again",
+      });
+    }
+  }
 });
 
 app.post("/lgn_action", express.json(), (req, res) => {
