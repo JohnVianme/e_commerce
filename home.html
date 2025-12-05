@@ -1,77 +1,79 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Home</title>
-		<script>
-			function initPage(){
-				var list = document.querySelector('ul')
-				list.innerHTML = ''
-				fetch('/sellers',{method:'get'})
-				.then((res)=>{
-					return res.json()
-				})
-				.then((sellers)=>{
-					if(sellers.length == 0){
-						list.innerHTML = '<li>No sellers available yet.</li>'
-						return
-					}
-					for (var i = 0; i < sellers.length; i++){
-						var seller = sellers[i]
-						var li = document.createElement('li')
-						var a = document.createElement('a')
-						
-						a.href = '/seller/'+ encodeURIComponent(seller.username)
-						a.innerText = seller.username + "'s Store"
-						li.appendChild(a)
-						list.appendChild(li)
-					}
-				})
-				.catch((err)=>{
-					console.log(err)
-					list.innerHTML = '<li>Error fetching sellers.</li>'
-				})
-			}
-			
-			function sendReq(url){
-				var username = window.localStorage.getItem('username')
-				// don't modify the url
-				var body = {}
-				if(username!=null){
-					body = {'username': username}
-				}
-				fetch(url, {
-					'method':'post',
-					'headers': {'Content-Type':'application/json'},
-					'body': JSON.stringify(body)
-				})
-				.then(function (res){
-					return res.text()
-				})
-				.then(function (text){
-					document.open()
-					document.write(text)
-					document.close()
-				})
-				.catch(function (err){
-					console.log(err)
-				})
-			}
-			
-		</script>
-	</head>
-	<body onload="initPage()">
-		<header>
-			<h1>This is our e-comm website.</h1>
-		</header>
-        <nav>
-			<a onclick="sendReq('home')">Home</a>
-			<a onclick="sendReq('about')">About</a>
-			<a onclick="sendReq('contact')">Contact</a>
-			<a onclick="sendReq('login')">Login</a>
-			<a onclick="sendReq('shopping_cart')">Shopping Cart</a>
-		</nav>
-		<ul>
-			<li>Producers go here</li>
-		</ul>
-	</body>
+  <head>
+    <title>Home</title>
+    <script>
+      function initPage() {
+        var list = document.querySelector("ul");
+        list.innerHTML = "";
+        fetch("/sellers", { method: "get" })
+          .then((res) => {
+            return res.json();
+          })
+          .then((sellers) => {
+            if (sellers.length == 0) {
+              list.innerHTML = "<li>No sellers available yet.</li>";
+              return;
+            }
+            for (var i = 0; i < sellers.length; i++) {
+              var seller = sellers[i];
+              var li = document.createElement("li");
+              var a = document.createElement("a");
+
+              a.href = "/seller/" + encodeURIComponent(seller.username);
+              a.innerText = seller.username + "'s Store";
+              li.appendChild(a);
+              list.appendChild(li);
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+            list.innerHTML = "<li>Error fetching sellers.</li>";
+          });
+      }
+
+      function sendReq(url) {
+        var username = window.localStorage.getItem("username");
+        // don't modify the url
+        var body = {};
+        if (username != null) {
+          body = { username: username };
+        }
+        fetch(url, {
+          method: "post",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        })
+          .then(function (res) {
+            return res.text();
+          })
+          .then(function (text) {
+            document.open();
+            document.write(text);
+            document.close();
+          })
+          .catch(function (err) {
+            console.log(err);
+          });
+      }
+    </script>
+  </head>
+  <body onload="initPage()">
+    <header>
+      <h1>This is our e-comm website.</h1>
+    </header>
+    <nav>
+      <a onclick="sendReq('home')">Home</a>
+      <a onclick="sendReq('about')">About</a>
+      <a onclick="sendReq('contact')">Contact</a>
+      <a onclick="sendReq('login')">Login</a>
+      <a onclick="sendReq('shopping_cart')">Shopping Cart</a>
+	  <a onclick="logout()">Logout</a>
+    </nav>
+    <ul>
+      <li>Producers go here</li>
+    </ul>
+    <!-- Load scripts after boody -->
+    <script src="./source.js"></script>
+  </body>
 </html>

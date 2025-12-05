@@ -3,7 +3,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ServerApiVersion } = require("mongodb");
 const { ObjectId } = require("mongodb");
 //baselines/globals
 const app = express();
@@ -241,11 +241,11 @@ async function addToCart(name, item) {
       { $addToSet: { cart: item } }
     );
     console.log(`Added to ${name}'s Cart!`);
-	return res.modifiedCount > 0
+    return res.modifiedCount > 0;
   } catch (error) {
     console.log("Error: addToCart() ");
     console.log(error);
-	return false
+    return false;
   }
 }
 
@@ -278,21 +278,21 @@ async function getCart(name) {
 	Return: True - if item was updated and removed
 			False - if no modification occured or if error was caught
 */
-async function removeFromCart(name, itemID){
-	try{
-		const coll = shopDB.collection("consumer")
-		const objectId = new ObjectId(itemID)
-		const res = await coll.updateOne(
-			{name:name},
-				{$pull:{cart:{_id:objectId}}}
-		)
-		console.log(`Removed from ${name}'s cart: ${itemID}`)
-		return res.modifiedCount > 0
-	}catch(err){
-		console.log("Error: removeFromCart()")
-		console.log(err)
-		return false
-	}
+async function removeFromCart(name, itemID) {
+  try {
+    const coll = shopDB.collection("consumer");
+    const objectId = new ObjectId(itemID);
+    const res = await coll.updateOne(
+      { name: name },
+      { $pull: { cart: { _id: objectId } } }
+    );
+    console.log(`Removed from ${name}'s cart: ${itemID}`);
+    return res.modifiedCount > 0;
+  } catch (err) {
+    console.log("Error: removeFromCart()");
+    console.log(err);
+    return false;
+  }
 }
 
 /*
@@ -302,32 +302,32 @@ async function removeFromCart(name, itemID){
 	Return: True - if a modification occured with in the DB collection
 			False - if no modification or error occured
 */
-async function purchaseCart(name){
-	try{
-		const coll = shopDB.collection('consumer')
-		const consumer = await coll.findOne({name:name})
-		
-		if(!consumer || !consumer.cart || consumer.cart.length == 0){
-			return false
-		}
-		
-		const cartItems = consumer.cart
-		
-		const res = await coll.updateOne(
-		{name:name},
-		{
-			$push: {purchased: {$each:cartItems}},
-			$set: {cart:[]}
-		}
-		)
-		
-		console.log(`Purchased cart for ${name}`)
-		return res.modifiedCount > 0 
-	}catch(err){
-		console.log("Error: purchaseCart()")
-		console.log(err)
-		return false
-	}
+async function purchaseCart(name) {
+  try {
+    const coll = shopDB.collection("consumer");
+    const consumer = await coll.findOne({ name: name });
+
+    if (!consumer || !consumer.cart || consumer.cart.length == 0) {
+      return false;
+    }
+
+    const cartItems = consumer.cart;
+
+    const res = await coll.updateOne(
+      { name: name },
+      {
+        $push: { purchased: { $each: cartItems } },
+        $set: { cart: [] },
+      }
+    );
+
+    console.log(`Purchased cart for ${name}`);
+    return res.modifiedCount > 0;
+  } catch (err) {
+    console.log("Error: purchaseCart()");
+    console.log(err);
+    return false;
+  }
 }
 /*
 	Function to gets items from a users shelf
@@ -436,8 +436,20 @@ function checkSession(username) {
   return false;
 }
 
-function removeUser(username){
-  
+/*
+Function to remove a user from the seasion list
+@return True able to, else return false
+*/
+function removeSessionUser(username) {
+  for (let i = 0; i < sessionList.length; i++) {
+    let curr = sessionList[i];
+    if (curr.username == username) {
+      // remove only 1 item at i
+      sessionList.splice(i, 1);
+      return true;
+    }
+  }
+  return false;
 }
 
 /*
@@ -539,26 +551,20 @@ app.get("/login", (req, res) => {
   res.sendFile(path.join(dir, "login.html"));
 });
 
+/*
+Endpoint for a user to logout, we consider it being logged out if localStorage
+and sessionList does not contain the user.
+*/
 app.get("/logout/:username", async (req, res) => {
-  const username = req.params.username;
-  if (!checkSession(username)) {
-    return res.status(400).json({
+  // try to remove the user
+  if (!removeSessionUser(req.params.username)) {
+    console.log("ERROR, unable to remove from session:", username);
+    return res.status(500).json({
       status: "error",
-      message: "Invalid username, unable to log out",
+      message: "Invalid username, unable to log out. Are you logged in?",
     });
-  } else {
-    const removeSuccess = removeUser(username);
-    if (removeSuccess) {
-      return res
-        .status(200)
-        .json({ status: "ok", message: "Success loggin out!" });
-    } else {
-      return res.status(400).json({
-        status: "error",
-        message: "Unable to loggout please try again",
-      });
-    }
   }
+  return res.status(200).json({ status: "ok", message: "Success loggin out!" });
 });
 
 app.post("/lgn_action", express.json(), (req, res) => {
@@ -733,71 +739,71 @@ app.post("/manage", express.json(), (req, res) => {
   res.sendFile(path.join(dir, "manage.html"));
 });
 
-app.get("/shopping_cart", (req,res) => {
-	res.sendFile(path.join(dir,"shopping_cart.html"))
-})
+app.get("/shopping_cart", (req, res) => {
+  res.sendFile(path.join(dir, "shopping_cart.html"));
+});
 
-app.post("/shopping_cart", (req,res) => {
-	res.sendFile(path.join(dir,"shopping_cart.html"))
-})
+app.post("/shopping_cart", (req, res) => {
+  res.sendFile(path.join(dir, "shopping_cart.html"));
+});
 
-app.get("/api/cart/:username",async(req,res)=>{
-	const username = req.params.username
-	try{
-		const cart = (await getCart(username)) || []
-		
-		const cartStringIDS = cart.map((item)=>({
-			...item,
-			_id: item._id ? item._id.toString() : null,
-		}))
-		res.json({username:username, cart:cartStringIDS})
-	}catch(err){
-		console.log("Error in GET /api/cart/:username",err)
-		res.status(500).json({error:"Server endpoint error"})
-	}
-})
+app.get("/api/cart/:username", async (req, res) => {
+  const username = req.params.username;
+  try {
+    const cart = (await getCart(username)) || [];
 
-app.post("/api/cart/remove",express.json(),async(req,res)=>{
-	const { username, itemId } = req.body
-	
-	if(!username || !itemId){
-		return res.status(400).json({success:false,message:"missing data"})
-	}
-	
-	try{
-		const check = await removeFromCart(username, itemId)
-		if(!check){
-			return res.json({success:false,message:"Could not remove item."})
-		}
-		res.json({success:true})
-	}catch(err){
-		console.log("Error in POST /api/cart/remove",err)
-		res.status(500).json({success:false,message:"Server error"})
-	}
-})
+    const cartStringIDS = cart.map((item) => ({
+      ...item,
+      _id: item._id ? item._id.toString() : null,
+    }));
+    res.json({ username: username, cart: cartStringIDS });
+  } catch (err) {
+    console.log("Error in GET /api/cart/:username", err);
+    res.status(500).json({ error: "Server endpoint error" });
+  }
+});
 
-app.post("/api/cart/purchase",express.json(),async(req,res)=>{
-	const { username } = req.body
-	
-	if(!username){
-		return res.status(400).json({success:false,message:"Missing user"})
-	}
-	
-	try{
-		const check = await purchaseCart(username)
-		if(!check){
-			return res.json({
-				success: false,
-				message: "No items to purchase or error occured",
-			})
-		}
-		res.json({success:true})
-	}catch(err){
-		console.log("Error in POST /api/cart/purchase", err)
-		res.status(500).json({success:false,message:"Server error"})
-	}
-})
-	
+app.post("/api/cart/remove", express.json(), async (req, res) => {
+  const { username, itemId } = req.body;
+
+  if (!username || !itemId) {
+    return res.status(400).json({ success: false, message: "missing data" });
+  }
+
+  try {
+    const check = await removeFromCart(username, itemId);
+    if (!check) {
+      return res.json({ success: false, message: "Could not remove item." });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.log("Error in POST /api/cart/remove", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.post("/api/cart/purchase", express.json(), async (req, res) => {
+  const { username } = req.body;
+
+  if (!username) {
+    return res.status(400).json({ success: false, message: "Missing user" });
+  }
+
+  try {
+    const check = await purchaseCart(username);
+    if (!check) {
+      return res.json({
+        success: false,
+        message: "No items to purchase or error occured",
+      });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.log("Error in POST /api/cart/purchase", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 /*
 ----------- End of endpoint managment-----------
 */
