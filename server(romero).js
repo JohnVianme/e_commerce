@@ -302,7 +302,7 @@ async function removeFromCart(name, itemID) {
     console.log("Invalid Session Login for: ", name);
     console.log("Session List", sessionList);
     console.log("User List", userList);
-    return null;
+    return false;
   }
   try {
     const coll = shopDB.collection("consumer");
@@ -312,7 +312,7 @@ async function removeFromCart(name, itemID) {
       { $pull: { cart: { _id: objectId } } }
     );
     console.log(`Removed from ${name}'s cart: ${itemID}`);
-    return res.modifiedCount > 0;
+    return res.modifiedCount == 1;
   } catch (err) {
     console.log("Error: removeFromCart()");
     console.log(err);
@@ -871,12 +871,14 @@ app.post("/api/cart/remove", express.json(), async (req, res) => {
   try {
     const check = await removeFromCart(username, itemId);
     if (!check) {
-      return res.json({ success: false, message: "Could not remove item." });
+      return res
+        .status(500)
+        .json({ success: false, message: "Could not remove item." });
     }
-    res.json({ success: true });
+    return res.status(200).json({ success: true });
   } catch (err) {
     console.log("Error in POST /api/cart/remove", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
