@@ -544,12 +544,12 @@ app.post("/add_item", express.json(), async (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log("Post Endpoint /login ")
+  console.log("Post Endpoint /login ");
   res.sendFile(path.join(dir, "login.html"));
 });
 
 app.get("/login", (req, res) => {
-  console.log("Get Endpoint /login ")
+  console.log("Get Endpoint /login ");
   res.sendFile(path.join(dir, "login.html"));
 });
 
@@ -565,10 +565,10 @@ app.get("/logout/:username", async (req, res) => {
   console.log("Logout Endpoint");
   console.log("User: ", req.params.username);
   console.log("URL: ", req.url);
-  console.log("seassionList: ", sessionList);
+  console.log("seassionList Before Logout: ", sessionList);
   const result = removeSessionUser(req.params.username);
   console.log("result: ", result);
-
+  console.log("seassionList After Logout: ", sessionList);
   // try to remove the user
   if (!result) {
     console.log("ERROR, unable to remove from session:", req.params.username);
@@ -588,8 +588,12 @@ app.post("/lgn_action", express.json(), (req, res) => {
   var hashedPW = hash.update(password).digest("hex");
 
   if (checkLogin(username, hashedPW)) {
-    var token = generateToken();
-    sessionList.push({ username: username, token: token });
+    // only new session users get a sesion token
+    if (!checkSession(username)) {
+      const token = generateToken();
+      sessionList.push({ username: username, token: token });
+    }
+    console.log("checkLogin Passed: seesionList", sessionList);
     var acctType = getAcctType(username);
     if (acctType == "customer") {
       res.send(`
@@ -837,6 +841,7 @@ async function loadServer() {
       console.log("Server is running...");
       console.log("Loading users...");
       userList = await loadUsers();
+      console.log("Session List", sessionList);
       console.log(userList.length, "User(s) loaded!");
     });
   } catch (error) {
