@@ -7,6 +7,7 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const { ObjectId } = require("mongodb");
 //baselines/globals
 const app = express();
+app.use(express.static(__dirname));
 const port = 8080;
 const URL = "mongodb://localhost:27017";
 const client = new MongoClient(URL);
@@ -568,6 +569,10 @@ app.post("/contact", express.json(), (req, res) => {
 
 app.get("/add_item", (req, res) => {
   res.sendFile(path.join(dir, "add_item.html"));
+});
+
+app.get("/styles.css", (req, res) => {
+  res.sendFile(path.join(dir, "styles.css"));
 });
 
 /* POST for adding a item to a sellers store */
