@@ -64,10 +64,12 @@ function checkUsers(username, acctType) {
     for (var i = 0; i < userList.length; i++) {
       var curr = userList[i];
       if (curr.username == username) {
+        console.log("checkUser said", false);
         return false;
       }
     }
   }
+  console.log("checkUser said", true);
   return true;
 }
 
@@ -236,7 +238,9 @@ async function addConsumer(name) {
   @return Tre if able to add to session, else False
 */
 async function addToCart(name, item) {
-  if (!validUserSession(name)) {
+  let valid = validUserSession(name);
+  console.log("Valid session result", valid);
+  if (!valid) {
     console.log("Invalid Session Login for: ", name);
     console.log("Session List", sessionList);
     console.log("User List", userList);
@@ -405,6 +409,7 @@ async function addToShelf(name, item) {
     console.log("Invalid Session Login for: ", name);
     console.log("Session List", sessionList);
     console.log("User List", userList);
+    console.log("addToSehlf said", false);
     return false;
   }
   try {
@@ -420,10 +425,12 @@ async function addToShelf(name, item) {
     );
     console.log(itemWithId);
     console.log(`Added to ${name}'s Shelf!`);
+    console.log("addToSehlf said", true);
     return true;
   } catch (error) {
     console.log("Error: addToShelf() ");
     console.log(error);
+    console.log("addToSehlf said", false);
     return false;
   }
 }
@@ -463,9 +470,12 @@ function checkSession(username) {
   for (var i = 0; i < sessionList.length; i++) {
     var curr = sessionList[i];
     if (curr.username == username) {
+      console.log("checkSession said", true);
+      console.log("Session List", sessionList);
       return true;
     }
   }
+  console.log("checkSession said", true);
   return false;
 }
 
@@ -533,9 +543,10 @@ function handleHome(req, res) {
 
 /*
 @return True if the user is loged in and has a session, False otherwise
+Note: Had to !checkUsers since it returns False if the user is in the userlist
 */
 function validUserSession(username) {
-  return checkUsers(username) && checkSession(username);
+  return !checkUsers(username) && checkSession(username);
 }
 
 /*
@@ -567,7 +578,17 @@ app.post("/contact", express.json(), (req, res) => {
   res.sendFile(path.join(dir, "contact.html"));
 });
 
-app.get("/add_item", (req, res) => {
+app.get("/add_item/:username", (req, res) => {
+  console.log("GET: /add_item endpoint");
+  if (
+    !validUserSession(req.params.username) ||
+    !checkSeller(req.params.username)
+  ) {
+    res.send(`<script>
+					alert('Invalid seller account session!')
+					window.location.href = '/login'
+				</script>`);
+  }
   res.sendFile(path.join(dir, "add_item.html"));
 });
 
@@ -577,14 +598,18 @@ app.get("/styles.css", (req, res) => {
 
 /* POST for adding a item to a sellers store */
 app.post("/add_item", express.json(), async (req, res) => {
+  console.log("POST: /add_item endpoint");
   console.log("About to add an item!");
   let qr = req.body;
   // add to the sellers data base
   let result = await addToShelf(qr.seller, qr);
   if (result) {
-    res.send("Item added");
+    return res.status(200).json({ message: "item added!", ok: true });
   } else {
-    res.send("Unable to send item, please try again another time");
+    return res.status(500).json({
+      message: "Unable to send item, you may need to login?",
+      ok: false,
+    });
   }
 });
 
@@ -618,11 +643,11 @@ app.get("/logout/:username", async (req, res) => {
   if (!result) {
     console.log("ERROR, unable to remove from session:", req.params.username);
     return res.status(500).json({
-      status: "error",
+      ok: false,
       message: "Invalid username, unable to log out. Are you logged in?",
     });
   }
-  return res.status(200).json({ status: "ok", message: "Success loggin out!" });
+  return res.status(200).json({ ok: true, message: "Success loggin out!" });
 });
 
 app.post("/lgn_action", express.json(), (req, res) => {
@@ -686,16 +711,14 @@ app.post("/api/cart/add", express.json(), async (req, res) => {
   try {
     const shelf = await getShelf(sellerName);
     if (!shelf) {
-      return res
-        .status(500)
-        .json({ message: "Seller not found.", status: "error" });
+      return res.status(500).json({ message: "Seller not found.", ok: false });
     }
     const objectId = new ObjectId(itemId);
     const item = shelf.find((it) => it._id.equals(objectId));
     if (!item) {
       return res.status(500).json({
         message: "Item not found in seller's shelf.",
-        status: "error",
+        ok: false,
       });
     }
     const result = await addToCart(buyerName, item);
@@ -703,17 +726,15 @@ app.post("/api/cart/add", express.json(), async (req, res) => {
       console.log("Could not add to cart, maybe session is wrong!");
       return res.status(500).json({
         message: "Could not add to cart, are you logged in?",
-        status: "error",
+        ok: false,
       });
     }
-    return res
-      .status(200)
-      .json({ message: "Item added to Cart!", status: "ok" });
+    return res.status(200).json({ message: "Item added to Cart!", ok: true });
   } catch (err) {
     console.log("Error: post at  /api/cart/add");
     return res.status(500).json({
       message: "Error in POST: /api/cart/add",
-      status: "error",
+      ok: false,
     });
   }
 });
