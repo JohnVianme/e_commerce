@@ -85,8 +85,18 @@
               seller: seller,
             }),
           });
-          var data = await res.json();
-          alert("Item added to cart!");
+          try {
+            let data = await res.json();
+            if (!data.ok) {
+              alert(data.message || "Unable to add item, are you logged in?");
+              window.location.href = "/login";
+            } else {
+              alert(data.message || "Item added to Cart!");
+            }
+          } catch (error) {
+            console.log("Something went wrong in seller.html");
+            console.log(error);
+          }
         } catch (err) {
           console.error(err);
           alert("Error adding item to cart.");

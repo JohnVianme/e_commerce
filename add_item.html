@@ -1,93 +1,100 @@
 <!DOCTYPE html>
 <html>
-    <head>
+  <head>
         <link rel="stylesheet" href="styles.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-        <title>Add Item</title>
-        <script>
-            function checkAuth(){
-                var username = window.localStorage.getItem('username')
-                var acctType = window.localStorage.getItem('acctType')
-                
-                if (!username || acctType != 'seller'){
-                    alert('You must be logged in as a seller to access this page.')
-                    window.location.href = '/login'
-                }
+    <title>Add Item</title>
+    <script>
+      function checkAuth() {
+        var username = window.localStorage.getItem("username");
+        var acctType = window.localStorage.getItem("acctType");
+
+        if (!username || acctType != "seller") {
+          alert("You must be logged in as a seller to access this page.");
+          window.location.href = "/login";
+        }
+      }
+
+      function submitItem() {
+        var productName = document.getElementById("productName").value;
+        var price = document.getElementById("price").value;
+        var description = document.getElementById("description").value;
+        var username = window.localStorage.getItem("username");
+
+        if (!productName || !price) {
+          alert("Please fill in all required fields.");
+          return;
+        }
+
+        var item = {
+          seller: username,
+          name: productName,
+          price: parseFloat(price),
+          description: description,
+        };
+
+        fetch("/add_item", {
+          method: "post",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(item),
+        })
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            if (!data.ok) {
+              console.log("Was not able to add it cart with fetch in add_item");
+              const msg =
+                data.message || "Unable to add item, are you logged in?";
+              alert(msg);
+            } else {
+              console.log("Was able to add it cart with fetch in add_item");
+              alert("Item Added!");
+              window.location.href = "/";
             }
-            
-            function submitItem(){
-                var productName = document.getElementById('productName').value
-                var price = document.getElementById('price').value
-                var description = document.getElementById('description').value
-                var username = window.localStorage.getItem('username')
-                
-                if (!productName || !price){
-                    alert('Please fill in all required fields.')
-                    return
-                }
-                
-                var item = {
-                    seller: username,
-                    name: productName,
-                    price: parseFloat(price),
-                    description: description
-                }
-                
-                fetch('/add_item', {
-                    method: 'post',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(item)
-                })
-                .then((res) => {
-                    return res.text()
-                })
-                .then((text) => {
-                    // document.open()
-                    // document.write(text)
-                    // document.close()
-                    alert("Item Added!")
-                    window.location.href = '/'
-                })
-                .catch((err) => {
-                    console.log(err)
-                    alert('Error adding item. Please try again.')
-                })
-            }
-        </script>
-    </head>
-    <body onload="checkAuth()">
-        <header>
-            <h1>Add Item</h1>
-        </header>
-        <nav>
-            <a href="/home">Home</a>
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-            <a href="/login">Login</a>
-        </nav>
-        <form>
-            <div>
-                <label for="productName">Product Name:</label>
-                <input type="text" id="productName" name="productName" required>
-            </div>
-        
-            <div>
-                <label for="price">Price:</label>
-                <input type="number" id="price" name="price" step="0.01" required>
-            </div>
-        
-            <div>
-                <label for="description">Description:</label>
-                <textarea id="description" name="description"></textarea>
-            </div>
-        
-            <input type="button" value="Submit" onclick="submitItem()">
-            <input type="button" value="Cancel" onclick="window.location.href='/home'">
-        </form>
-        <footer>
-            &copy; 2025 E Commerce Inc.
-        </footer>
-    </body>
+          })
+          .catch((err) => {
+            console.log(err);
+            alert("Error adding item. Please try again.");
+          });
+      }
+    </script>
+  </head>
+  <body onload="checkAuth()">
+    <header>
+      <h1>Add Item</h1>
+    </header>
+    <nav>
+      <a href="/home">Home</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+      <a href="/login">Login</a>
+    </nav>
+    <form>
+      <div>
+        <label for="productName">Product Name:</label>
+        <input type="text" id="productName" name="productName" required />
+      </div>
+
+      <div>
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" step="0.01" required />
+      </div>
+
+      <div>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description"></textarea>
+      </div>
+
+      <input type="button" value="Submit" onclick="submitItem()" />
+      <input
+        type="button"
+        value="Cancel"
+        onclick="window.location.href='/home'"
+      />
+    </form>
+    <footer>&copy; 2025 E Commerce Inc.</footer>
+  </body>
 </html>

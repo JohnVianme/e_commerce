@@ -232,8 +232,15 @@ async function addConsumer(name) {
 	Function to add an item to a users cart
 	@name = a username for a user
 	@item = a product object: {name : name, price: price, seller: seller, description: description}
+  @return Tre if able to add to session, else False
 */
 async function addToCart(name, item) {
+  if (!validUserSession(name)) {
+    console.log("Invalid Session Login for: ", name);
+    console.log("Session List", sessionList);
+    console.log("User List", userList);
+    return false;
+  }
   try {
     const coll = shopDB.collection("consumer");
     const res = await coll.updateOne(
@@ -241,7 +248,7 @@ async function addToCart(name, item) {
       { $addToSet: { cart: item } }
     );
     console.log(`Added to ${name}'s Cart!`);
-    return res.modifiedCount > 0;
+    return true;
   } catch (error) {
     console.log("Error: addToCart() ");
     console.log(error);
@@ -255,6 +262,12 @@ async function addToCart(name, item) {
 	@return: list of items
 */
 async function getCart(name) {
+  if (!validUserSession(name)) {
+    console.log("Invalid Session Login for: ", name);
+    console.log("Session List", sessionList);
+    console.log("User List", userList);
+    return null;
+  }
   try {
     let coll = shopDB.collection("consumer");
     let consumer = await coll.findOne({ name: name });
@@ -267,6 +280,7 @@ async function getCart(name) {
   } catch (error) {
     console.log("Error: getCart() ");
     console.log(error);
+    return null;
   }
 }
 
@@ -279,6 +293,12 @@ async function getCart(name) {
 			False - if no modification occured or if error was caught
 */
 async function removeFromCart(name, itemID) {
+  if (!validUserSession(name)) {
+    console.log("Invalid Session Login for: ", name);
+    console.log("Session List", sessionList);
+    console.log("User List", userList);
+    return null;
+  }
   try {
     const coll = shopDB.collection("consumer");
     const objectId = new ObjectId(itemID);
@@ -303,6 +323,11 @@ async function removeFromCart(name, itemID) {
 			False - if no modification or error occured
 */
 async function purchaseCart(name) {
+  if (!validUserSession(name)) {
+    console.log("Invalid Session Login for: ", name);
+    console.log("Session List", sessionList);
+    return false;
+  }
   try {
     const coll = shopDB.collection("consumer");
     const consumer = await coll.findOne({ name: name });
@@ -342,12 +367,12 @@ async function getShelf(name) {
       let shelf = producer.shelf;
       return shelf;
     } else {
-      return [];
+      return null;
     }
   } catch (error) {
     console.log("Error: getShelf() ");
     console.log(error);
-    return [];
+    return null;
   }
 }
 
@@ -375,6 +400,12 @@ async function addProducer(name) {
 	@item = a product object: {name : name, price: price, seller: seller, description: description}
 */
 async function addToShelf(name, item) {
+  if (!validUserSession(name)) {
+    console.log("Invalid Session Login for: ", name);
+    console.log("Session List", sessionList);
+    console.log("User List", userList);
+    return false;
+  }
   try {
     const coll = shopDB.collection("product");
     // add id for each item
@@ -416,6 +447,7 @@ async function createSellerProfile(username) {
     return true;
   } catch (err) {
     console.log("Error creating seller profile:", err);
+    return false;
   }
 }
 
@@ -497,6 +529,14 @@ function handleHome(req, res) {
     res.sendFile(path.join(dir, "home.html"));
   }
 }
+
+/*
+@return True if the user is loged in and has a session, False otherwise
+*/
+function validUserSession(username) {
+  return checkUsers(username) && checkSession(username);
+}
+
 /*
 -----------End of Functions----------------------
 */
@@ -641,20 +681,35 @@ app.post("/api/cart/add", express.json(), async (req, res) => {
   try {
     const shelf = await getShelf(sellerName);
     if (!shelf) {
-      return res.json({ message: "Seller not found." });
+      return res
+        .status(500)
+        .json({ message: "Seller not found.", status: "error" });
     }
     const objectId = new ObjectId(itemId);
     const item = shelf.find((it) => it._id.equals(objectId));
     if (!item) {
-      return res.json({ message: "Item not found in seller's shelf." });
+      return res.status(500).json({
+        message: "Item not found in seller's shelf.",
+        status: "error",
+      });
     }
     const result = await addToCart(buyerName, item);
     if (!result) {
-      return res.json({ message: "Could not add to cart" });
+      console.log("Could not add to cart, maybe session is wrong!");
+      return res.status(500).json({
+        message: "Could not add to cart, are you logged in?",
+        status: "error",
+      });
     }
-    res.json({ message: "Item added to Cart!" });
+    return res
+      .status(200)
+      .json({ message: "Item added to Cart!", status: "ok" });
   } catch (err) {
     console.log("Error: post at  /api/cart/add");
+    return res.status(500).json({
+      message: "Error in POST: /api/cart/add",
+      status: "error",
+    });
   }
 });
 
