@@ -5,10 +5,10 @@ This is a e-commerce demo built with Node.js, Express, and MongoDB. Users can cr
 
 Dependencies used in the project include: express, path, fs, crypto, and mongodb.
 
-To install the dependencies, run: 
+To install the dependencies, run:  
 `npm install express mongodb`
 
-To start the server, run: 
+To start the server, run:  
 `node server.js`
 
 Once the server is running, open your browser and go to: http://localhost:8080
