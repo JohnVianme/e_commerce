@@ -410,24 +410,6 @@ async function getShelf(name) {
 }
 
 /*
-	Helper to add a producer obejct:
-	Type Product:
-	name: string
-	shelf: list of things to sell
-*/
-async function addProducer(name) {
-  try {
-    const coll = shopDB.collection("product");
-    const user = { name: name, shelf: [] };
-    const res = await coll.insertOne(user);
-    console.log(`Added ${name}!`);
-  } catch (error) {
-    console.log("Error: addProducer() ");
-    console.log(error);
-  }
-}
-
-/*
 	Function to add an item to a users shelf
 	@name = a username for a user
 	@item = a product object: {name : name, price: price, seller: seller, description: description}
