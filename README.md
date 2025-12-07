@@ -1,5 +1,5 @@
 # Final Project for CSC 337
-**e_commerce**
+**E_Commerce**
 
 This is a e-commerce demo built with Node.js, Express, and MongoDB. Users can create accounts, log in, browse sellers, add items to a cart, and make purchases. Sellers can add items to their shelves and manage their own product listings.
 
