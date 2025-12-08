@@ -948,7 +948,7 @@ app.post("/api/cart/purchase", express.json(), async (req, res) => {
 
 app.use(express.urlencoded({ extended: true }));
 
-app.post("/message", express.json(), (req, res) => {
+app.post("/message", express.json(), async (req, res) => {
   console.log("/message: POST endpoint");
   const name = req.body.name;
   const email = req.body.email;
@@ -962,12 +962,26 @@ app.post("/message", express.json(), (req, res) => {
   </script>
 `);
   } else {
+    item = { name: name, email: email, subject: subject, msg: msg };
+    try {
+      const coll = shopDB.collection("contact");
+      const itemWithId = {
+        _id: new ObjectId(), // new id field
+        ...item, // keep all of the old info
+      };
+      const res = await coll.insertOne(itemWithId);
+      console.log(itemWithId);
+      console.log(`Added to ${name}'s conatct!`);
+    } catch (error) {
+      console.log("Error: addToShelf() ");
+      console.log(error);
+    }
     res.send(`
-  <script>
-    alert("Thank you for contacting us! We will reach out in 48 hours.");
-    window.location.href = "/contact";
-  </script>
-`);
+      <script>
+        alert("Thank you for contacting us! We will reach out in 48 hours.");
+        window.location.href = "/contact";
+      </script>
+    `);
   }
 });
 
