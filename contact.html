@@ -1,57 +1,77 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" href="/styles.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-        <title>Contact</title>
-        <script>
-            function sendReq(url){
-                var username = window.localStorage.getItem('username')
-                var body = {}
-                if(username!=null){
-                    body = {'username': username}
-                }
-                fetch(url, {
-                    'method':'post',
-                    'headers': {'Content-Type':'application/json'},
-                    'body': JSON.stringify(body)
-                })
-                .then(function (res){
-                    return res.text()
-                })
-                .then(function (text){
-                    document.open()
-                    document.write(text)
-                    document.close()
-                })
-                .catch(function (err){
-                    console.log(err)
-                })
-            }
-        </script>
-    </head>
-    <body>
-        <header>
-            <h1>Contact Us</h1>
-        </header>
-        <nav>
-            <a onclick="sendReq('home')">Home</a>
-            <a onclick="sendReq('about')">About</a>
-            <a onclick="sendReq('contact')">Contact</a>
-            <a onclick="sendReq('login')">Login</a>
-        </nav>
-        <div class="pageText">
-            <h2>Contact us at the following locations:</h2>
-            <ul>
-                <li>Phone: (000) 000-0000</li>
-                <li>Email: ecommerceinc@email.com</li>
-                <li>Social Media: @ecommerceinc</li>
-            </ul>
+  <head>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Contact</title>
+    <script>
+      function sendReq(url) {
+        var username = window.localStorage.getItem("username");
+        var body = {};
+        if (username != null) {
+          body = { username: username };
+        }
+        fetch(url, {
+          method: "post",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        })
+          .then(function (res) {
+            return res.text();
+          })
+          .then(function (text) {
+            document.open();
+            document.write(text);
+            document.close();
+          })
+          .catch(function (err) {
+            console.log(err);
+          });
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>Contact Us</h1>
+    </header>
+    <nav>
+      <a onclick="sendReq('home')">Home</a>
+      <a onclick="sendReq('about')">About</a>
+      <a onclick="sendReq('contact')">Contact</a>
+      <a onclick="sendReq('login')">Login</a>
+    </nav>
+
+    <div class="pageText" style="margin: 20px">
+      <h2>Get in Touch</h2>
+      <form class="contact-form" method="post" action="/message">
+        <div>
+          <label for="name">Name:</label>
+          <input type="text" id="name" name="name" />
         </div>
-        <footer>
-            &copy; 2025 E Commerce Inc.
-        </footer>
-    </body>
+
+        <div>
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email" />
+        </div>
+
+        <div>
+          <label for="subject">Subject:</label>
+          <input type="text" id="subject" name="subject" />
+        </div>
+
+        <div>
+          <label for="message">Message:</label>
+          <textarea id="message" name="message" rows="5"></textarea>
+        </div>
+
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+    <footer>&copy; 2025 E Commerce Inc.</footer>
+  </body>
 </html>

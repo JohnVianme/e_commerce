@@ -3,7 +3,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
-const { MongoClient} = require("mongodb");
+const { MongoClient } = require("mongodb");
 const { ObjectId } = require("mongodb");
 //baselines/globals
 const app = express();
@@ -943,6 +943,31 @@ app.post("/api/cart/purchase", express.json(), async (req, res) => {
   } catch (err) {
     console.log("Error in POST /api/cart/purchase", err);
     return res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.use(express.urlencoded({ extended: true }));
+
+app.post("/message", express.json(), (req, res) => {
+  console.log("/message: POST endpoint");
+  const name = req.body.name;
+  const email = req.body.email;
+  const subject = req.body.subject;
+  const msg = req.body.message;
+  if (!name || !email || !subject || !msg) {
+    res.send(`
+  <script>
+    alert("Invalid info, please try again");
+    window.location.href = "/contact";
+  </script>
+`);
+  } else {
+    res.send(`
+  <script>
+    alert("Thank you for contacting us! We will reach out in 48 hours.");
+    window.location.href = "/contact";
+  </script>
+`);
   }
 });
 
