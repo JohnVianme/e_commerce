@@ -996,11 +996,6 @@ async function loadServer() {
   try {
     // connect to the DB
     await MongoConnectAwait();
-    // console.log("Products:");
-    // await showProducts();
-    // console.log("Consumers:");
-    // await showConsumers();
-    // start the server
     app.listen(port, async () => {
       console.log("Server is running...");
       console.log("Loading users...");
